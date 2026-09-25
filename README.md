@@ -15,8 +15,8 @@ creates two reviewable artifacts:
 - `system-analysis.md` — a human explanation with system inventory, flow narratives, source
   evidence, uncertainties, and reproduction notes.
 
-The YAML catalog format is documented as the standalone
-[`S2L specification`](s2l/README.md), with its JSON Schema and a minimal valid example.
+The YAML catalog format is defined by the standalone
+[`datainsightat/s2l` specification](https://github.com/datainsightat/s2l).
 
 It follows the same prompt-native structure as FeatherSpec: one tool-neutral constitution,
 shared workflow files, thin Claude Code/GitHub Copilot loaders, and a bounded specialist agent.
