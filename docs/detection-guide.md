@@ -25,9 +25,9 @@ folder layout. A root-only repository without a manifest becomes one fallback ap
 
 ## Stack-specific source discovery
 
-The primary stack is Java, Kotlin, Perl, SQL, MongoDB, JSON, and CSV. This is a priority list,
-not a closed allowlist: apply the **Analogous technologies** rule below when the repository
-uses another framework, document database, or structured file format.
+The primary stack is Java, Kotlin, Perl, SQL, MongoDB, JSON, CSV, and APIs. This is a priority
+list, not a closed allowlist: apply the **Analogous technologies** rule below when the
+repository uses another framework, protocol, document database, or structured file format.
 
 ### Java and Kotlin
 
@@ -69,22 +69,72 @@ Confirmed cross-project edges include:
 Imports inside one project do not create separate systems. Similar package names alone do not
 prove a dependency.
 
-## HTTP and RPC
+## APIs
 
-Server evidence includes literal route declarations and registered controllers/handlers in
-Java/Kotlin (including Spring, JAX-RS, and Ktor), Perl (including Dancer and Mojolicious), and
-other supported languages, plus GraphQL resolvers/schemas and protobuf service
-implementations. Client evidence includes literal Java/Kotlin HTTP-client calls, Perl
-user-agent calls, and generated-client calls whose target contract is visible.
+Treat APIs as first-class systems when source evidence proves an exposed or external boundary.
+Supported styles include REST/HTTP, OpenAPI/Swagger, GraphQL, gRPC/protobuf, SOAP/WSDL,
+webhooks, and contract-described asynchronous APIs.
 
-An exposed boundary becomes an `api` system. A caller-to-API edge needs a literal compatible
-path/method, a generated client bound to the contract, or explicit configuration linking the
-client to that API. Dynamically assembled base URLs remain uncertain unless configuration
-resolves them locally.
+### Server and ownership evidence
 
-Endpoint data objects require visible payload, parameter, response, GraphQL, or protobuf field
-definitions. An endpoint path by itself may be represented by a conservative endpoint object,
-but it does not justify invented payload fields.
+Confirmed server evidence includes:
+
+- Spring MVC/WebFlux, JAX-RS, Ktor, Dancer/Dancer2, and Mojolicious route declarations;
+- GraphQL schemas plus resolver/controller registration;
+- protobuf service definitions plus visible server implementation or registration;
+- WSDL service/port definitions plus visible SOAP implementation or binding;
+- webhook handlers with a literal path/event registration;
+- OpenAPI/Swagger declarations tied to a visible server, generated server, or application
+  configuration.
+
+An exposed boundary becomes an `api` system. The owning application points to the API it
+exposes. A contract without visible ownership is useful field evidence but does not by itself
+prove which application serves the API.
+
+### Client and consumer evidence
+
+Confirmed client evidence includes a literal compatible operation call, a generated client
+bound to a visible contract, or explicit configuration linking the client to the API. Examples
+include Java/Kotlin HTTP clients, Feign/Retrofit clients, Spring clients, Perl user agents,
+GraphQL operations, gRPC stubs, and SOAP clients.
+
+A call edge points caller → API. Do not add a reverse system edge merely because a response
+travels back on the same request. Dynamically assembled hosts, paths, service discovery, and
+runtime-injected clients remain uncertain unless configuration resolves them in scope.
+
+### API data objects
+
+API data objects require visible field definitions in path/query/header parameters, request or
+response bodies, GraphQL inputs/outputs, protobuf messages, SOAP messages, webhook payloads,
+or an equivalent typed contract. Preserve exact serialized names and nested property paths.
+
+Direction depends on the message role:
+
+```text
+request/path/query/header field → caller → API
+response field                  → API → caller
+webhook payload                 → publisher/caller → receiving API
+```
+
+Use a stable operation signature (for example `POST /orders`), GraphQL operation/type,
+protobuf service method/message, or SOAP operation/message as the S2L source `table`. Use the
+field or property path as `column`. An endpoint path alone may prove an endpoint object but
+does not justify invented payload fields.
+
+### Asynchronous API contracts
+
+AsyncAPI and similar contracts can prove channels, operations, and message fields. Model a
+topic, queue, or stream as a `datastructure` unless source code proves a distinct API gateway
+or request/response boundary. Producer operations point application → channel; consumer
+operations point channel → application.
+
+### API safety
+
+Copy a web address into S2L only when it is an explicit safe HTTP(S) URL. Do not emit URI
+templates, unresolved environment variables, service-discovery names, or non-HTTP schemes in
+`url`. Never read or reproduce authorization headers, API keys, bearer tokens, cookies,
+client secrets, or credential-bearing examples. Inspect contract schemas and field names,
+not sensitive example values.
 
 ## SQL and databases
 
@@ -200,10 +250,11 @@ the closest established rule when direct syntax proves all of the following:
 3. whether the operation reads or writes;
 4. the container and fields being transferred.
 
-For example, another document database follows the MongoDB evidence and direction rules, and
-another delimited or structured file format follows the CSV/JSON rules. If one of these facts
-is dynamic or unresolved, record the candidate under uncertainties instead of generalizing
-from a package name.
+For example, another request/response protocol follows the API ownership/call/message rules,
+another document database follows the MongoDB evidence and direction rules, and another
+delimited or structured file format follows the CSV/JSON rules. If one of these facts is
+dynamic or unresolved, record the candidate under uncertainties instead of generalizing from
+a package name.
 
 ## Criticality suggestions
 

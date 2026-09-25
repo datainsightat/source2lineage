@@ -54,10 +54,12 @@ Inventory:
   literal reads/writes;
 - JSON/JSONL schemas, models, mappings, and explicit readers/writers;
 - CSV/TSV headers, mappings, parser/writer configuration, and explicit readers/writers;
-- HTTP/GraphQL/gRPC clients and servers;
+- REST/HTTP, GraphQL, gRPC, SOAP, and webhook clients, servers, handlers, and generated clients;
+- OpenAPI/Swagger, AsyncAPI, GraphQL, protobuf, and WSDL contracts in JSON, YAML, XML, or their
+  native schema formats;
 - message producers/consumers plus topic or queue declarations;
 - file and object-store reads/writes;
-- contracts (`.graphql`, `.gql`, `.proto`) and data models;
+- API request/response/message models and explicit serialization mappings;
 - documentation that may explain names or purpose, marked as documentation-only until
   corroborated.
 
@@ -86,8 +88,8 @@ Every scout delegation must state:
   `docs/detection-guide.md` are authoritative;
 - that it may write only its report, must not execute code, and must return at most five lines;
 - the required report sections from the evidence rule.
-- which of Java, Kotlin, Perl, SQL, MongoDB, JSON, CSV, or analogous technologies occur in the
-  assigned unit so the scout applies the corresponding detection-guide rules.
+- which of Java, Kotlin, Perl, SQL, MongoDB, JSON, CSV, APIs, or analogous technologies occur
+  in the assigned unit so the scout applies the corresponding detection-guide rules.
 
 After each report, verify that it has all required sections and at least one concrete evidence
 reference for every confirmed finding. Mark the worklist row done only after this check. If a
@@ -114,6 +116,10 @@ file.
 - A local import creates an application edge only when it crosses confirmed project
   boundaries.
 - An exposed API gets its own API system when route/contract evidence exists.
+- API calls point caller → API; API ownership/exposure points owning application → API.
+  Request fields flow caller → API, response fields flow API → caller, and webhook payloads
+  flow publisher/caller → receiving API. Do not reverse a connection merely because response
+  data travels back over the same request.
 - SQL writes point application → data structure; reads point data structure → application.
 - MongoDB inserts, updates, replacements, deletes, and bulk writes point application →
   collection; finds, queries, and aggregations point collection → application.
@@ -125,8 +131,8 @@ file.
 ### Reconcile data objects
 
 - Create objects for confirmed SQL columns, MongoDB document fields, JSON properties, CSV
-  columns, contract fields, endpoint payload fields, message fields, or explicit file-record
-  fields.
+  columns, API path/query/header/body fields, request/response fields, GraphQL/protobuf/SOAP
+  fields, contract fields, message fields, or explicit file-record fields.
 - If no data object can be confirmed, do not create a placeholder or source-inventory object.
   Record the evidence gap in `.lineage-work/`, stop before final-file creation, and report that
   S2L v6 requires at least one evidence-confirmed object.
@@ -134,6 +140,8 @@ file.
 - In S2L `source.table`, preserve the physical or logical container name: SQL table/view,
   MongoDB collection, JSON record/file contract, or CSV dataset. Preserve target paths such as
   nested MongoDB/JSON properties and CSV column names in target `column`.
+- For APIs, use a stable operation signature or contract message/type in `source.table` and
+  preserve the exact parameter/property path in `source.column` and target `column`.
 - Add targets only when a mapping, transfer, shared contract, or matching literal usage proves
   the flow. Matching names alone are insufficient.
 - Assign criticality conservatively: `critical` for credentials, government identifiers, or

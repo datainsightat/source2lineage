@@ -56,11 +56,12 @@ Only confirmed findings enter `data-lineage.yaml`. Probable and unknown findings
 Inspect common manifests (`package.json`, `pyproject.toml`, `pom.xml`, Gradle builds,
 `.csproj`, `.fsproj`, `go.mod`, `Cargo.toml`, `composer.json`, `Gemfile`, `mix.exs`,
 `cpanfile`, `Makefile.PL`, `Build.PL`, `dist.ini`) to find project boundaries and explicit
-metadata. Prioritize Java, Kotlin, Perl, SQL, MongoDB, JSON, and CSV evidence while applying
-the same evidence rules to analogous technologies. Inspect supported source for:
+metadata. Prioritize Java, Kotlin, Perl, SQL, MongoDB, JSON, CSV, and API evidence while
+applying the same evidence rules to analogous technologies. Inspect supported source for:
 
 - local imports and project references;
-- HTTP route declarations and literal HTTP client calls;
+- REST/HTTP routes and clients, OpenAPI contracts, GraphQL operations, gRPC/protobuf services,
+  SOAP/WSDL bindings, webhooks, and AsyncAPI contracts;
 - SQL DDL plus literal reads and writes;
 - explicit ORM entities, mappings, migrations, and connection configuration;
 - MongoDB collection declarations, validators, models, and literal read/write operations;
@@ -75,15 +76,20 @@ Names locate candidates; file contents decide findings.
 For JSON, inspect schemas, keys, and mappings rather than copying data values. For CSV, inspect
 only headers, schemas, and parser/writer configuration; never reproduce record rows. Treat
 connection strings and MongoDB URIs as potentially sensitive: record only non-secret logical
-database or collection names and never emit credentials.
+database or collection names and never emit credentials. Never record API keys, authorization
+headers, bearer tokens, cookies, or credential-bearing request examples.
 
 ## System and flow semantics
 
 - A manifest-owned deployable or module is an `application`.
-- An exposed or external HTTP/GraphQL/gRPC boundary is an `api`.
+- An exposed or external REST/HTTP, GraphQL, gRPC, SOAP, webhook, or equivalent request/response
+  boundary is an `api`. An AsyncAPI channel backed by a topic or queue is normally a
+  `datastructure` unless the source proves a separate API boundary.
 - A database, table grouping, stream, queue, file store, or equivalent persisted structure is
   a `datastructure`.
 - `outputs` point from producer/caller/writer to consumer/callee/store.
+- API calls point caller → API. An application that owns and exposes a boundary points
+  application → API. Request objects flow caller → API; response objects flow API → caller.
 - SQL and MongoDB writes point from the application to the data structure; reads point from
   the data structure to the application. File writes follow application → file store, and file
   reads follow file store → application.

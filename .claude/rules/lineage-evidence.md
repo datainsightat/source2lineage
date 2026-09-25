@@ -30,6 +30,12 @@ container (SQL table/view, MongoDB collection, JSON contract/file, or CSV datase
 MongoDB or JSON fields, preserve dotted property paths. For CSV, cite header or mapping
 configuration only; do not include data rows.
 
+For API evidence, record the API style, owner/server, consumer/client, operation signature,
+contract or route declaration, literal/configured endpoint when safe, and the call site that
+proves direction. Classify each field as path, query, header, request body, response body,
+GraphQL input/output, protobuf message, SOAP message, webhook payload, or asynchronous message.
+Never copy authorization values, cookies, API keys, tokens, or sensitive request examples.
+
 Evidence references are repository-relative `path:line` locations. Include a symbol or config
 key when one finding spans several lines. Short snippets may be used only when needed to
 disambiguate direction; never copy secrets or large source passages.
@@ -40,6 +46,9 @@ Do not promote these to confirmed evidence on their own:
 - README claims without code/config corroboration;
 - comments describing intended behavior;
 - dynamically assembled URLs or SQL whose resolved value is not visible;
+- an OpenAPI, WSDL, GraphQL, protobuf, or AsyncAPI contract without visible ownership or
+  producer/consumer wiring;
+- a client dependency or generated-client import without an operation call or explicit binding;
 - dynamically assembled MongoDB collection names or file paths whose resolved value is not
   visible;
 - a `.json` or `.csv` filename without code/configuration proving how it participates in a

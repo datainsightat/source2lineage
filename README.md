@@ -26,11 +26,12 @@ There is no analysis server, package install, or application instrumentation.
 
 - Discovers projects from common manifests and workspace references.
 - Maps local cross-project imports and references.
-- Detects HTTP, GraphQL, and gRPC servers and clients from explicit source evidence.
+- Detects REST/HTTP, OpenAPI, GraphQL, gRPC, SOAP, webhook, and asynchronous API boundaries,
+  contracts, clients, and payload fields from explicit source evidence.
 - Detects SQL schemas, reads, writes, migrations, and explicit ORM mappings.
 - Analyzes Perl projects and modules alongside standalone or embedded SQL.
-- Prioritizes Java/Kotlin, Perl, SQL, MongoDB, JSON, and CSV with evidence rules that extend to
-  analogous document stores and structured formats.
+- Prioritizes Java/Kotlin, Perl, SQL, MongoDB, JSON, CSV, and APIs with evidence rules that
+  extend to analogous protocols, document stores, and structured formats.
 - Detects explicit queues, topics, messages, file exchanges, and object-store flows.
 - Produces a browser-compatible catalog conforming to the S2L version 6 specification.
 - Separates confirmed findings from probable or runtime-only behavior.
