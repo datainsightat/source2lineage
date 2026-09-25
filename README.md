@@ -33,6 +33,10 @@ There is no analysis server, package install, or application instrumentation.
 
 ## Bundled browser app
 
+<div align="center">
+  <img src="assets/data_object_example.png" alt="Example Dataobject" width="100%">
+</div>
+
 The interactive analyzer and catalog editor now live under [`app/`](app/):
 
 - [`app/source_lineage_analyzer.html`](app/source_lineage_analyzer.html) — browser analyzer,
