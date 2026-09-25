@@ -15,6 +15,9 @@ creates two reviewable artifacts:
 - `system-analysis.md` — a human explanation with system inventory, flow narratives, source
   evidence, uncertainties, and reproduction notes.
 
+The YAML catalog format is documented as the standalone
+[`S2L specification`](s2l/README.md), with its JSON Schema and a minimal valid example.
+
 It follows the same prompt-native structure as FeatherSpec: one tool-neutral constitution,
 shared workflow files, thin Claude Code/GitHub Copilot loaders, and a bounded specialist agent.
 There is no analysis server, package install, or application instrumentation.
@@ -47,15 +50,10 @@ The interactive analyzer and catalog editor now live under [`app/`](app/):
 - [`app/demo_product_catalog.yaml`](app/demo_product_catalog.yaml) — ready-to-open product
   lineage example.
 
-Run the app locally:
-
-```bash
-cd app
-python3 -m http.server 8000
-```
-
-Then open <http://localhost:8000/source_lineage_analyzer.html>. To explore without scanning a
-repository, select **Open YAML** and choose `demo_product_catalog.yaml`.
+The app is standalone and does not need a web server. After cloning or downloading the
+repository, open [`app/source_lineage_analyzer.html`](app/source_lineage_analyzer.html)
+directly in a current browser. To explore without scanning a repository, select **Open YAML**
+and choose `app/demo_product_catalog.yaml`.
 
 ## Quick start
 

@@ -13,16 +13,12 @@ bundled with [Source2Lineage](../README.md).
 - `demo_product_catalog.yaml` — editable example with a product specification app, PostgreSQL
   database, internal API, external API, and representative product data objects.
 
-## Start the browser app
+## Open the browser app
 
-From this directory:
-
-```bash
-python3 -m http.server 8000
-```
-
-Open <http://localhost:8000/source_lineage_analyzer.html> in a current browser. The app runs
-locally; selected source files are not uploaded.
+No installation or web server is required. Open `source_lineage_analyzer.html` directly in a
+current browser—for example, by double-clicking the file after cloning or downloading the
+repository. The app runs from the local filesystem, and selected source files are not
+uploaded.
 
 ### Try the demo
 
@@ -83,4 +79,3 @@ It never executes the analyzed source.
 Static analysis cannot prove runtime-only dependency injection, dynamically assembled URLs or
 SQL, reflection, generated clients without visible contracts, or environment-specific wiring.
 Treat the result as an evidence-backed starting point for review.
-

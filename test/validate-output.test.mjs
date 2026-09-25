@@ -13,6 +13,12 @@ test('accepts a compatible catalog and complete report', () => {
   assert.deepEqual(result.errors, []);
 });
 
+test('accepts the minimal catalog published with the S2L specification', () => {
+  const example = path.join(root, '..', 's2l', 'examples', 'minimal.data-lineage.yaml');
+  const catalog = parseCatalog(fs.readFileSync(example, 'utf8'));
+  assert.deepEqual(validateCatalog(catalog), []);
+});
+
 test('rejects unknown systems, duplicate IDs, and invalid links', () => {
   const catalog = parseCatalog(fs.readFileSync(fixture('valid-data-lineage.yaml'), 'utf8'));
   catalog.systems[0].outputs.push('Missing System');
@@ -34,4 +40,3 @@ test('rejects incomplete reports and placeholders', () => {
 test('rejects non-JSON YAML syntax with a clear message', () => {
   assert.throws(() => parseCatalog('version: 6\nsystems: []'), /must use JSON syntax/);
 });
-

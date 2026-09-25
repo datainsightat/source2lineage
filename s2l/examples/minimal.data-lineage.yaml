@@ -1,0 +1,54 @@
+{
+  "version": 6,
+  "systems": [
+    {
+      "name": "Orders App",
+      "description": "Creates orders from confirmed HTTP requests.",
+      "url": "https://orders.example.com",
+      "type": "application",
+      "outputs": [
+        "Orders DB"
+      ]
+    },
+    {
+      "name": "Orders DB",
+      "description": "Stores order records.",
+      "url": "",
+      "type": "datastructure",
+      "outputs": []
+    }
+  ],
+  "objects": [
+    {
+      "id": "orders.order_id",
+      "field": "order_id",
+      "datatype": "uuid",
+      "criticality": "medium",
+      "source": {
+        "system": "Orders App",
+        "table": "OrderRequest",
+        "column": "order_id"
+      },
+      "targets": [
+        {
+          "system": "Orders DB",
+          "column": "orders.id"
+        }
+      ]
+    }
+  ],
+  "layouts": {
+    "systems": {},
+    "catalog": {},
+    "systemView": {
+      "x": 0,
+      "y": 0,
+      "scale": 1
+    },
+    "catalogView": {
+      "x": 0,
+      "y": 0,
+      "scale": 1
+    }
+  }
+}
