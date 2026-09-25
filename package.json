@@ -1,0 +1,14 @@
+{
+  "name": "source2lineage-agent",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Agent instructions and dependency-free validation for evidence-backed source lineage analysis.",
+  "scripts": {
+    "test": "node --test",
+    "validate": "node scripts/validate-output.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

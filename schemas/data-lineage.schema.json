@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://source2lineage.local/schemas/data-lineage.schema.json",
+  "title": "Source2Lineage catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "systems", "objects", "layouts"],
+  "properties": {
+    "version": { "const": 6 },
+    "systems": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/system" }
+    },
+    "objects": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/dataObject" }
+    },
+    "layouts": { "$ref": "#/$defs/layouts" }
+  },
+  "$defs": {
+    "system": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description", "url", "type", "outputs"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "url": {
+          "anyOf": [
+            { "const": "" },
+            { "type": "string", "format": "uri", "pattern": "^https?://" }
+          ]
+        },
+        "type": { "enum": ["application", "api", "datastructure"] },
+        "outputs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "mapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "column"],
+      "properties": {
+        "system": { "type": "string", "minLength": 1 },
+        "column": { "type": "string" }
+      }
+    },
+    "sourceMapping": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["system", "table", "column"],
+      "properties": {
+        "system": { "type": "string", "minLength": 1 },
+        "table": { "type": "string" },
+        "column": { "type": "string" }
+      }
+    },
+    "dataObject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "field", "datatype", "criticality", "source", "targets"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9_.:-]+$" },
+        "field": { "type": "string", "minLength": 1 },
+        "datatype": { "type": "string" },
+        "criticality": { "enum": ["low", "medium", "high", "critical"] },
+        "source": { "$ref": "#/$defs/sourceMapping" },
+        "targets": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/mapping" }
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    },
+    "positions": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/position" }
+    },
+    "view": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "scale"],
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" },
+        "scale": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "layouts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["systems", "catalog", "systemView", "catalogView"],
+      "properties": {
+        "systems": { "$ref": "#/$defs/positions" },
+        "catalog": { "$ref": "#/$defs/positions" },
+        "systemView": { "$ref": "#/$defs/view" },
+        "catalogView": { "$ref": "#/$defs/view" }
+      }
+    }
+  }
+}

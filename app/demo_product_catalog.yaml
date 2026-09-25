@@ -1,0 +1,165 @@
+version: 6
+systems:
+  - name: Product Specification App
+    description: Internal application used by product managers to create and maintain product specifications.
+    url: https://products.example.com
+    type: application
+    outputs:
+      - Product Catalog PostgreSQL
+  - name: Product Catalog PostgreSQL
+    description: PostgreSQL database containing the authoritative product catalog and publication state.
+    url: ""
+    type: datastructure
+    outputs:
+      - Product Catalog API
+  - name: Product Catalog API
+    description: Internal REST API that reads approved product data from PostgreSQL and exposes it to consumers.
+    url: https://api.example.com/products
+    type: api
+    outputs:
+      - External Marketplace API
+  - name: External Marketplace API
+    description: External partner API that receives published product specifications.
+    url: https://marketplace.example.net/api/products
+    type: api
+    outputs: []
+objects:
+  - id: product_id
+    field: product_id
+    datatype: uuid
+    criticality: high
+    source:
+      system: Product Specification App
+      table: product_specification
+      column: product_id
+    targets:
+      - system: Product Catalog PostgreSQL
+        column: products.product_id
+      - system: Product Catalog API
+        column: productId
+      - system: External Marketplace API
+        column: externalProductId
+  - id: product_sku
+    field: sku
+    datatype: varchar(64)
+    criticality: high
+    source:
+      system: Product Specification App
+      table: product_specification
+      column: sku
+    targets:
+      - system: Product Catalog PostgreSQL
+        column: products.sku
+      - system: Product Catalog API
+        column: sku
+      - system: External Marketplace API
+        column: sellerSku
+  - id: product_name
+    field: product_name
+    datatype: varchar(255)
+    criticality: medium
+    source:
+      system: Product Specification App
+      table: product_specification
+      column: name
+    targets:
+      - system: Product Catalog PostgreSQL
+        column: products.name
+      - system: Product Catalog API
+        column: name
+      - system: External Marketplace API
+        column: title
+  - id: product_description
+    field: product_description
+    datatype: text
+    criticality: low
+    source:
+      system: Product Specification App
+      table: product_specification
+      column: description
+    targets:
+      - system: Product Catalog PostgreSQL
+        column: products.description
+      - system: Product Catalog API
+        column: description
+      - system: External Marketplace API
+        column: description
+  - id: product_price
+    field: list_price
+    datatype: numeric(12,2)
+    criticality: high
+    source:
+      system: Product Specification App
+      table: product_specification
+      column: list_price
+    targets:
+      - system: Product Catalog PostgreSQL
+        column: products.list_price
+      - system: Product Catalog API
+        column: price.amount
+      - system: External Marketplace API
+        column: offer.price
+  - id: product_currency
+    field: currency_code
+    datatype: char(3)
+    criticality: medium
+    source:
+      system: Product Specification App
+      table: product_specification
+      column: currency_code
+    targets:
+      - system: Product Catalog PostgreSQL
+        column: products.currency_code
+      - system: Product Catalog API
+        column: price.currency
+      - system: External Marketplace API
+        column: offer.currency
+  - id: product_publication_status
+    field: publication_status
+    datatype: varchar(20)
+    criticality: medium
+    source:
+      system: Product Catalog PostgreSQL
+      table: products
+      column: publication_status
+    targets:
+      - system: Product Catalog API
+        column: status
+      - system: External Marketplace API
+        column: lifecycleStatus
+  - id: product_updated_at
+    field: updated_at
+    datatype: timestamptz
+    criticality: low
+    source:
+      system: Product Catalog PostgreSQL
+      table: products
+      column: updated_at
+    targets:
+      - system: Product Catalog API
+        column: lastModifiedAt
+      - system: External Marketplace API
+        column: lastUpdated
+layouts:
+  systems:
+    Product Specification App:
+      x: 60
+      y: 220
+    Product Catalog PostgreSQL:
+      x: 340
+      y: 220
+    Product Catalog API:
+      x: 620
+      y: 220
+    External Marketplace API:
+      x: 900
+      y: 220
+  catalog: {}
+  systemView:
+    x: 0
+    y: 0
+    scale: 1
+  catalogView:
+    x: 0
+    y: 0
+    scale: 1

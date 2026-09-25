@@ -1,0 +1,1097 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Source Lineage Analyzer</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0b1220;--panel:#152033;--panel2:#0e1728;--border:#30415c;--text:#f4f7fb;--muted:#9fb0c7;--accent:#15b8a6;--accent2:#0f766e;--blue:#3b82f6;--purple:#8b5cf6;--pink:#ec4899;--warn:#fbbf24;--error:#f87171}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,#15354a 0,transparent 30%),var(--bg);color:var(--text);font:14px Inter,system-ui,sans-serif;min-height:100vh}header{padding:28px max(24px,calc((100vw - 1320px)/2));border-bottom:1px solid var(--border);background:#08101dcc}h1,h2,h3,p{margin-top:0}h1{font-size:27px;margin-bottom:6px}.subtitle{color:var(--muted);margin:0}.shell{max-width:1320px;margin:auto;padding:24px;display:grid;grid-template-columns:360px 1fr;gap:20px}.panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;box-shadow:0 18px 45px #0002}.panel h2{font-size:16px}.stack{display:grid;gap:14px}.drop{display:block;border:1px dashed #5c789c;border-radius:12px;padding:28px 18px;text-align:center;background:var(--panel2);cursor:pointer;transition:.2s}.drop:hover{border-color:var(--accent);background:#102336}.drop strong{display:block;font-size:16px;margin-bottom:6px}.drop span{color:var(--muted)}input[type=file]{display:none}label{display:block;color:#c9d5e5;font-size:12px;margin-bottom:5px}input[type=text],input[type=number],select,textarea{width:100%;border:1px solid var(--border);border-radius:8px;background:#091321;color:var(--text);padding:10px}input[type=checkbox]{accent-color:var(--accent)}.check{display:flex;gap:9px;align-items:center;color:#dce6f3}.check label{margin:0;font-size:14px}.button{border:1px solid var(--border);border-radius:8px;background:#24344b;color:var(--text);padding:10px 14px;font-weight:650;cursor:pointer}.button:hover{filter:brightness(1.12)}.primary{background:var(--accent2);border-color:#2dd4bf}.button:disabled{opacity:.45;cursor:not-allowed}.actions,.tools{display:flex;gap:9px;flex-wrap:wrap;align-items:center}.tools{margin-bottom:12px}.tools select{width:auto;min-width:180px}.panel-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}.panel-head h2{margin:0}.status{padding:11px 12px;border-radius:8px;background:#0a1728;color:var(--muted);min-height:42px;line-height:1.4}.status.error{color:#fecaca;border:1px solid #7f1d1d}.workspace{display:grid;gap:20px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.stat{background:var(--panel2);border:1px solid var(--border);padding:15px;border-radius:10px}.stat strong{font-size:24px;display:block}.stat span,.graph-stats{color:var(--muted);font-size:12px}.empty{color:var(--muted);padding:40px 10px;text-align:center}.table-wrap{overflow:auto;max-height:310px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--border);vertical-align:top}th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;position:sticky;top:0;background:var(--panel)}a{color:#67e8f9;text-underline-offset:2px}.pill{display:inline-block;border-radius:999px;padding:3px 8px;font-size:11px;background:#28415f}.application{background:#173b70}.api{background:#07594f}.datastructure{background:#56349a}.warnings{color:#fde68a;margin:0;padding-left:20px}.preview{height:330px;resize:vertical;font:12px ui-monospace,SFMono-Regular,Consolas,monospace;line-height:1.5}.help{color:var(--muted);font-size:12px;line-height:1.5}.privacy{border-left:3px solid var(--accent);padding-left:10px}.graph{height:480px;border:1px solid var(--border);border-radius:10px;background:#08111f;overflow:hidden;touch-action:none}.graph svg{display:block;width:100%;height:100%;cursor:grab;user-select:none}.graph svg.panning{cursor:grabbing}.node{cursor:grab;touch-action:none}.node.selected{cursor:grabbing}.node rect{stroke:#ffffff99;stroke-width:2;rx:9}.node.application rect{fill:var(--blue)}.node.datastructure rect{fill:var(--purple)}.node.api rect{fill:#059669}.node.object rect{fill:var(--pink)}.node.selected rect{stroke:#fff;stroke-width:4}.node.linked rect{stroke:#67e8f9}.node text{fill:#fff;font-size:13px;pointer-events:none}.node .sub{fill:#e2e8f0;font-size:11px}.edge{fill:none;stroke:#94a3b8;stroke-width:2.2}.graph-info{margin-top:10px;min-height:48px;padding:10px 12px;background:#0a1728;border:1px solid var(--border);border-radius:8px;color:var(--muted);white-space:pre-wrap;line-height:1.45}.legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:10px;color:#cbd5e1;font-size:12px}.dot{width:11px;height:11px;border-radius:3px}.dot.application{background:var(--blue)}.dot.datastructure{background:var(--purple)}.dot.api{background:#059669}.dot.object{background:var(--pink)}.wide{grid-column:1/-1}@media(max-width:900px){.shell{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.graph{height:400px}.panel-head{align-items:flex-start;flex-direction:column}}
+    .header-row{max-width:1320px;margin:auto;display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap}.tabs{max-width:1320px;margin:16px auto 0;padding:0 24px;display:flex;gap:8px;flex-wrap:wrap}.tab.active{border-color:#2dd4bf;background:var(--accent2)}.page{display:none}.page.active{display:block}.page.active.shell{display:grid}.catalog-page{max-width:1320px;margin:auto;padding:24px;gap:20px}.page.active.catalog-page{display:grid}.editor-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.editor-grid .full{grid-column:1/-1}.editor-grid textarea{height:110px;min-height:110px;resize:vertical}.editor-toolbar{display:flex;gap:12px;align-items:end;justify-content:space-between;flex-wrap:wrap}.editor-toolbar>div:first-child{flex:1;min-width:220px}.danger{color:#fecaca;border-color:#7f1d1d}.target-row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;background:var(--panel2);border:1px solid var(--border);border-radius:9px;padding:11px;margin-top:9px}.target-row .button{padding:9px 12px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}.section-title h3{margin:0;font-size:14px}.editor-status{color:var(--muted);min-height:20px;margin-top:10px}.editor-status.error{color:#fecaca}.editor-status.ok{color:#86efac}select[multiple]{min-height:118px}.empty-editor{color:var(--muted);padding:24px 0}.header-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.file-button{display:inline-block;margin:0}.catalog-page .graph{height:570px}@media(max-width:700px){.editor-grid,.target-row{grid-template-columns:1fr}.editor-grid .full{grid-column:auto}.header-row{align-items:flex-start}.catalog-page{padding:16px}.tabs{padding:0 16px}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-row">
+      <div><h1>Source Lineage Analyzer</h1><p class="subtitle">Analyze source code or open and edit an existing lineage catalog locally.</p></div>
+      <div class="header-actions"><button id="newCatalog" class="button">New catalog</button><label class="button file-button" for="openCatalog">Open YAML</label><input id="openCatalog" type="file" accept=".yaml,.yml,.json,application/yaml,text/yaml,application/json"><button id="headerDownload" class="button primary" disabled>Download YAML</button></div>
+    </div>
+  </header>
+  <nav class="tabs" aria-label="Catalog sections">
+    <button class="button tab active" data-page="analysisPage">Analysis</button>
+    <button class="button tab" data-page="systemsPage">Systeme</button>
+    <button class="button tab" data-page="objectsPage">Datenobjekte</button>
+    <button class="button tab" data-page="visualPage">Gesamtvisualisierung</button>
+  </nav>
+  <main id="analysisPage" class="page active shell">
+    <aside class="panel stack">
+      <div>
+        <h2>1. Select source</h2>
+        <label class="drop" for="folder"><strong>Choose repository folder</strong><span id="selection">No folder selected</span></label>
+        <input id="folder" type="file" webkitdirectory multiple>
+      </div>
+      <div>
+        <label for="projectName">Fallback project name</label>
+        <input id="projectName" type="text" value="Application">
+      </div>
+      <div>
+        <label for="ignore">Additional ignored directories</label>
+        <input id="ignore" type="text" placeholder="generated,tmp,snapshots">
+      </div>
+      <div>
+        <label for="maxSize">Maximum file size (KB)</label>
+        <input id="maxSize" type="number" value="1024" min="1">
+      </div>
+      <div class="check"><input id="tests" type="checkbox"><label for="tests">Include tests and fixtures</label></div>
+      <div class="actions"><button id="analyze" class="button primary" disabled>Analyze source</button><button id="clear" class="button">Clear</button></div>
+      <div id="status" class="status">Select a repository. Files remain in this browser and are never uploaded.</div>
+      <p class="help privacy">The analyzer reads supported text files locally. It skips secrets, dependencies, build output, binary files, and oversized files.</p>
+    </aside>
+    <section class="workspace">
+      <div class="panel">
+        <h2>Analysis summary</h2>
+        <div class="stats">
+          <div class="stat"><strong id="fileCount">0</strong><span>files analyzed</span></div>
+          <div class="stat"><strong id="systemCount">0</strong><span>systems</span></div>
+          <div class="stat"><strong id="objectCount">0</strong><span>data objects</span></div>
+          <div class="stat"><strong id="connectionCount">0</strong><span>connections</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>Detected systems</h2>
+        <div class="table-wrap"><table><thead><tr><th>System</th><th>Type</th><th>Web address</th><th>Outputs</th><th>Source evidence</th></tr></thead><tbody id="systems"><tr><td colspan="5" class="empty">Run an analysis to see detected systems.</td></tr></tbody></table></div>
+      </div>
+      <div class="panel">
+        <h2>Evidence and limitations</h2>
+        <ul id="warnings" class="warnings"><li class="empty">Warnings and conservative fallbacks appear here.</li></ul>
+      </div>
+      <div class="panel">
+        <div class="actions" style="justify-content:space-between;align-items:center"><h2 style="margin:0">Catalog preview</h2><button id="download" class="button primary" disabled>Download YAML</button></div>
+        <p class="help">The preview uses JSON syntax, which is valid YAML 1.2 and loads without an external parser in the catalog application.</p>
+        <textarea id="preview" class="preview" readonly placeholder="Generated catalog YAML appears here."></textarea>
+      </div>
+    </section>
+  </main>
+  <section id="systemsPage" class="page catalog-page">
+    <div class="panel">
+      <div class="editor-toolbar">
+        <div><label for="systemSelect">System</label><select id="systemSelect"><option value="">No catalog loaded</option></select></div>
+        <div class="actions"><button id="newSystem" class="button">+ New</button><button id="saveSystem" class="button primary">Save</button><button id="deleteSystem" class="button danger">Delete</button></div>
+      </div>
+      <div id="systemEditor" class="editor-grid" hidden>
+        <div><label for="systemName">Name</label><input id="systemName" type="text"></div>
+        <div><label for="systemType">Type</label><select id="systemType"><option value="application">Application</option><option value="datastructure">Data structure</option><option value="api">API</option></select></div>
+        <div class="full"><label for="systemDescription">Description</label><textarea id="systemDescription"></textarea></div>
+        <div><label for="systemUrl">Web address</label><input id="systemUrl" type="url" placeholder="https://..."></div>
+        <div><label for="systemOutputs">Outputs</label><select id="systemOutputs" multiple></select></div>
+      </div>
+      <div id="systemEditorEmpty" class="empty-editor">Select + New to create the first system, or open an existing catalog.</div>
+      <div id="systemEditStatus" class="editor-status"></div>
+    </div>
+    <div id="systemGraphPanel" class="panel">
+      <div class="panel-head"><h2>System hierarchy</h2><span id="systemGraphStats" class="graph-stats"></span></div>
+      <div class="tools"><select id="systemFilter" aria-label="Filter system"><option value="">All systems</option></select><button id="systemAuto" class="button">Auto arrange</button><button id="systemZoomIn" class="button">Zoom +</button><button id="systemZoomOut" class="button">Zoom −</button><button id="systemReset" class="button">Reset view</button><button id="systemSvg" class="button">Save SVG</button></div>
+      <div class="graph"><svg id="systemGraph" aria-label="System hierarchy visualization"></svg></div>
+      <div id="systemInfo" class="graph-info">Hover over a system for evidence. Select a linked system to open its web address.</div>
+      <div class="legend"><span class="dot datastructure"></span>Data structure <span class="dot application"></span>Application <span class="dot api"></span>API</div>
+    </div>
+  </section>
+  <section id="objectsPage" class="page catalog-page">
+    <div class="panel">
+      <div class="editor-toolbar">
+        <div><label for="objectSelect">Data object</label><select id="objectSelect"><option value="">No catalog loaded</option></select></div>
+        <div class="actions"><button id="newObject" class="button">+ New</button><button id="saveObject" class="button primary">Save</button><button id="deleteObject" class="button danger">Delete</button></div>
+      </div>
+      <div id="objectEditor" hidden>
+        <div class="editor-grid">
+          <div><label for="objectField">Field</label><input id="objectField" type="text"></div>
+          <div><label for="objectDatatype">Data type</label><input id="objectDatatype" type="text"></div>
+          <div><label for="objectCriticality">Criticality</label><select id="objectCriticality"><option value="low">low</option><option value="medium">medium</option><option value="high">high</option><option value="critical">critical</option></select></div>
+          <div><label for="sourceSystem">Source system</label><select id="sourceSystem"></select></div>
+          <div><label for="sourceTable">Source table</label><input id="sourceTable" type="text"></div>
+          <div><label for="sourceColumn">Source column</label><input id="sourceColumn" type="text"></div>
+        </div>
+        <div class="section-title"><h3>Targets</h3><button id="addTarget" class="button">+ Target</button></div>
+        <div id="targetRows"></div>
+      </div>
+      <div id="objectEditorEmpty" class="empty-editor">Select + New to create the first data object, or open an existing catalog.</div>
+      <div id="objectEditStatus" class="editor-status"></div>
+    </div>
+  </section>
+  <section id="visualPage" class="page catalog-page">
+    <div id="lineageGraphPanel" class="panel">
+      <div class="panel-head"><h2>Complete data lineage</h2><span id="lineageGraphStats" class="graph-stats"></span></div>
+      <div class="tools"><select id="objectFilter" aria-label="Filter data object"><option value="">All data objects</option></select><select id="lineageSystemFilter" aria-label="Filter lineage system"><option value="">All systems</option></select><button id="lineageAuto" class="button">Auto arrange</button><button id="lineageZoomIn" class="button">Zoom +</button><button id="lineageZoomOut" class="button">Zoom −</button><button id="lineageReset" class="button">Reset view</button><button id="lineageSvg" class="button">Save SVG</button></div>
+      <div class="graph"><svg id="lineageGraph" aria-label="Data object lineage visualization"></svg></div>
+      <div class="legend"><span class="dot datastructure"></span>Data structure <span class="dot application"></span>Application <span class="dot api"></span>API <span class="dot object"></span>Data object</div>
+    </div>
+  </section>
+  <script src="source_lineage_engine.js"></script>
+  <script>
+    'use strict';
+    const byId = id => document.getElementById(id);
+    let selectedFiles = [];
+    let generated = '';
+    let currentCatalog = null;
+    let currentSystemName = '';
+    let currentObjectId = '';
+    let systemPositions = {};
+    let lineagePositions = {};
+    const systemView = { x: 0, y: 0, scale: 1 };
+    const lineageView = { x: 0, y: 0, scale: 1 };
+    const typeLabels = { application: 'Application', api: 'API', datastructure: 'Data structure', object: 'Data object' };
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+    }
+
+    function httpUrl(value) {
+      try {
+        const url = new URL(String(value || '').trim());
+        return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+      } catch {
+        return '';
+      }
+    }
+
+    function systemUrlCell(system) {
+      const url = httpUrl(system.url);
+      return url ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(system.url) + '</a>' : escapeHtml(system.url || '—');
+    }
+
+    function uniqueId() {
+      return 'object_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    }
+
+    function emptyCatalog() {
+      return {
+        version: 6,
+        systems: [],
+        objects: [],
+        layouts: { systems: {}, catalog: {}, systemView: { x: 0, y: 0, scale: 1 }, catalogView: { x: 0, y: 0, scale: 1 } }
+      };
+    }
+
+    function splitYamlPair(value) {
+      let single = false;
+      let double = false;
+      for (let index = 0; index < value.length; index += 1) {
+        const character = value[index];
+        if (character === "'" && !double) single = !single;
+        else if (character === '"' && !single && value[index - 1] !== '\\') double = !double;
+        else if (character === ':' && !single && !double) return [value.slice(0, index).trim(), value.slice(index + 1).trim()];
+      }
+      return null;
+    }
+
+    function splitYamlInline(value) {
+      const parts = [];
+      let start = 0;
+      let depth = 0;
+      let single = false;
+      let double = false;
+      for (let index = 0; index < value.length; index += 1) {
+        const character = value[index];
+        if (character === "'" && !double) single = !single;
+        else if (character === '"' && !single && value[index - 1] !== '\\') double = !double;
+        else if (!single && !double) {
+          if (character === '[' || character === '{') depth += 1;
+          if (character === ']' || character === '}') depth -= 1;
+          if (character === ',' && depth === 0) {
+            parts.push(value.slice(start, index).trim());
+            start = index + 1;
+          }
+        }
+      }
+      parts.push(value.slice(start).trim());
+      return parts.filter(Boolean);
+    }
+
+    function yamlScalar(value) {
+      const text = value.trim();
+      if (!text || text === '~' || text === 'null' || text === 'Null' || text === 'NULL') return null;
+      if (text === 'true' || text === 'True' || text === 'TRUE') return true;
+      if (text === 'false' || text === 'False' || text === 'FALSE') return false;
+      if (/^-?(?:\d+\.?\d*|\.\d+)$/.test(text)) return Number(text);
+      if (text.startsWith('[') && text.endsWith(']')) return splitYamlInline(text.slice(1, -1)).map(yamlScalar);
+      if (text.startsWith('{') && text.endsWith('}')) {
+        const object = {};
+        for (const entry of splitYamlInline(text.slice(1, -1))) {
+          const pair = splitYamlPair(entry);
+          if (!pair) throw new Error('Invalid inline YAML mapping: ' + entry);
+          object[String(yamlScalar(pair[0]))] = yamlScalar(pair[1]);
+        }
+        return object;
+      }
+      if (text.startsWith('"') && text.endsWith('"')) return JSON.parse(text);
+      if (text.startsWith("'") && text.endsWith("'")) return text.slice(1, -1).replace(/''/g, "'");
+      return text;
+    }
+
+    function parseSimpleYaml(text) {
+      const lines = String(text).replace(/^\uFEFF/, '').split(/\r?\n/).map((raw, lineNumber) => {
+        if (/\t/.test(raw.match(/^\s*/)?.[0] || '')) throw new Error('Tabs are not supported for YAML indentation (line ' + (lineNumber + 1) + ').');
+        let content = raw.trimEnd();
+        let single = false;
+        let double = false;
+        for (let index = 0; index < content.length; index += 1) {
+          const character = content[index];
+          if (character === "'" && !double) single = !single;
+          else if (character === '"' && !single && content[index - 1] !== '\\') double = !double;
+          else if (character === '#' && !single && !double && (index === 0 || /\s/.test(content[index - 1]))) {
+            content = content.slice(0, index).trimEnd();
+            break;
+          }
+        }
+        return { indent: content.match(/^ */)[0].length, content: content.trim(), lineNumber: lineNumber + 1 };
+      }).filter(line => line.content && line.content !== '---' && line.content !== '...');
+      if (!lines.length) throw new Error('The YAML file is empty.');
+      let position = 0;
+      const parseBlock = indent => lines[position]?.content.startsWith('-') ? parseSequence(indent) : parseMapping(indent);
+      const assignPair = (object, pair, propertyIndent) => {
+        const key = String(yamlScalar(pair[0]));
+        if (!key) throw new Error('Empty YAML key on line ' + (lines[position - 1]?.lineNumber || '?') + '.');
+        if (pair[1] === '|' || pair[1] === '>') {
+          const folded = pair[1] === '>';
+          const values = [];
+          while (position < lines.length && lines[position].indent > propertyIndent) values.push(lines[position++].content);
+          object[key] = values.join(folded ? ' ' : '\n');
+        } else if (pair[1] !== '') object[key] = yamlScalar(pair[1]);
+        else if (position < lines.length && lines[position].indent > propertyIndent) object[key] = parseBlock(lines[position].indent);
+        else object[key] = null;
+      };
+      const parseMapping = indent => {
+        const object = {};
+        while (position < lines.length && lines[position].indent === indent && !lines[position].content.startsWith('-')) {
+          const line = lines[position++];
+          const pair = splitYamlPair(line.content);
+          if (!pair) throw new Error('Expected a YAML key on line ' + line.lineNumber + '.');
+          assignPair(object, pair, indent);
+        }
+        return object;
+      };
+      const parseSequence = indent => {
+        const array = [];
+        while (position < lines.length && lines[position].indent === indent && lines[position].content.startsWith('-')) {
+          const line = lines[position++];
+          const rest = line.content.slice(1).trim();
+          if (!rest) array.push(position < lines.length && lines[position].indent > indent ? parseBlock(lines[position].indent) : null);
+          else {
+            const pair = splitYamlPair(rest);
+            if (!pair) array.push(yamlScalar(rest));
+            else {
+              const object = {};
+              assignPair(object, pair, indent + 2);
+              if (position < lines.length && lines[position].indent > indent) Object.assign(object, parseMapping(lines[position].indent));
+              array.push(object);
+            }
+          }
+        }
+        return array;
+      };
+      const result = parseBlock(lines[0].indent);
+      if (position !== lines.length) throw new Error('Unsupported YAML structure near line ' + lines[position].lineNumber + '.');
+      return result;
+    }
+
+    function parseCatalogDocument(text) {
+      try {
+        return JSON.parse(text);
+      } catch (jsonError) {
+        try {
+          return parseSimpleYaml(text);
+        } catch (yamlError) {
+          throw new Error('Could not parse the catalog as JSON or YAML: ' + yamlError.message);
+        }
+      }
+    }
+
+    function normalizeCatalog(data) {
+      if (!data || typeof data !== 'object' || !Array.isArray(data.systems) || !Array.isArray(data.objects)) {
+        throw new Error('The catalog must contain systems and objects lists.');
+      }
+      const systems = data.systems.map(system => ({
+        name: String(system?.name || '').trim(),
+        description: String(system?.description || ''),
+        url: String(system?.url || ''),
+        type: ['application', 'datastructure', 'api'].includes(system?.type) ? system.type : 'application',
+        outputs: Array.isArray(system?.outputs) ? system.outputs.map(String) : (system?.output ? [String(system.output)] : [])
+      })).filter(system => system.name);
+      const lowerNames = systems.map(system => system.name.toLowerCase());
+      if (new Set(lowerNames).size !== lowerNames.length) throw new Error('System names must be unique.');
+      const names = new Set(systems.map(system => system.name));
+      systems.forEach(system => { system.outputs = [...new Set(system.outputs)].filter(output => names.has(output) && output !== system.name); });
+      const usedIds = new Set();
+      const objects = data.objects.map(object => {
+        let id = String(object?.id || uniqueId());
+        while (usedIds.has(id)) id += '_copy';
+        usedIds.add(id);
+        const source = object?.source && typeof object.source === 'object' ? object.source : {};
+        return {
+          id,
+          field: String(object?.field || ''),
+          datatype: String(object?.datatype || ''),
+          criticality: ['low', 'medium', 'high', 'critical'].includes(object?.criticality) ? object.criticality : 'medium',
+          source: { system: names.has(source.system) ? source.system : '', table: String(source.table || ''), column: String(source.column || '') },
+          targets: (Array.isArray(object?.targets) ? object.targets : []).filter(target => names.has(target?.system)).map(target => ({ system: target.system, column: String(target.column || '') }))
+        };
+      });
+      return {
+        version: Number(data.version) || 6,
+        systems,
+        objects,
+        layouts: data.layouts && typeof data.layouts === 'object' ? data.layouts : {
+          systems: data.sysPos || {}, catalog: data.allPos || {}, systemView: data.sysView || {}, catalogView: data.allView || {}
+        }
+      };
+    }
+
+    function loadView(target, source) {
+      target.x = Number.isFinite(Number(source?.x)) ? Number(source.x) : 0;
+      target.y = Number.isFinite(Number(source?.y)) ? Number(source.y) : 0;
+      target.scale = Number.isFinite(Number(source?.scale)) ? Math.max(0.25, Math.min(4, Number(source.scale))) : 1;
+    }
+
+    function validPositions(value) {
+      const result = {};
+      if (!value || typeof value !== 'object') return result;
+      for (const [key, position] of Object.entries(value)) if (Number.isFinite(Number(position?.x)) && Number.isFinite(Number(position?.y))) {
+        result[key] = { x: Number(position.x), y: Number(position.y) };
+      }
+      return result;
+    }
+
+    function setCatalog(data) {
+      currentCatalog = normalizeCatalog(data);
+      systemPositions = validPositions(currentCatalog.layouts?.systems);
+      lineagePositions = validPositions(currentCatalog.layouts?.catalog);
+      loadView(systemView, currentCatalog.layouts?.systemView);
+      loadView(lineageView, currentCatalog.layouts?.catalogView);
+      currentSystemName = currentCatalog.systems.some(system => system.name === currentSystemName) ? currentSystemName : (currentCatalog.systems[0]?.name || '');
+      currentObjectId = currentCatalog.objects.some(object => object.id === currentObjectId) ? currentObjectId : (currentCatalog.objects[0]?.id || '');
+      updateCatalogUi();
+    }
+
+    function serializeCurrentCatalog() {
+      if (!currentCatalog) return '';
+      currentCatalog.version = 6;
+      currentCatalog.layouts = {
+        systems: systemPositions,
+        catalog: lineagePositions,
+        systemView: { ...systemView },
+        catalogView: { ...lineageView }
+      };
+      return SourceLineage.serialize(currentCatalog);
+    }
+
+    function syncGeneratedOnly() {
+      generated = serializeCurrentCatalog();
+      byId('preview').value = generated;
+      byId('download').disabled = !currentCatalog;
+      byId('headerDownload').disabled = !currentCatalog;
+    }
+
+    function renderCatalogSummary() {
+      const systems = currentCatalog?.systems || [];
+      const objects = currentCatalog?.objects || [];
+      const connections = systems.reduce((count, system) => count + system.outputs.length, 0);
+      byId('systemCount').textContent = systems.length;
+      byId('objectCount').textContent = objects.length;
+      byId('connectionCount').textContent = connections;
+      byId('systems').innerHTML = systems.length
+        ? systems.map(system => '<tr><td>' + escapeHtml(system.name) + '</td><td><span class="pill ' + system.type + '">' + escapeHtml(system.type) + '</span></td><td>' + systemUrlCell(system) + '</td><td>' + escapeHtml(system.outputs.join(', ') || '—') + '</td><td>' + escapeHtml(system.description) + '</td></tr>').join('')
+        : '<tr><td colspan="5" class="empty">No systems in this catalog.</td></tr>';
+    }
+
+    function setEditorStatus(id, message, error = false) {
+      const element = byId(id);
+      element.textContent = message;
+      element.className = 'editor-status ' + (error ? 'error' : (message ? 'ok' : ''));
+    }
+
+    function optionMarkup(selected = '', exclude = '') {
+      return (currentCatalog?.systems || []).filter(system => system.name !== exclude).slice().sort((a, b) => a.name.localeCompare(b.name)).map(system =>
+        '<option value="' + escapeHtml(system.name) + '" ' + (system.name === selected ? 'selected' : '') + '>' + escapeHtml(system.name) + '</option>'
+      ).join('');
+    }
+
+    function renderSystemEditor() {
+      const systems = currentCatalog?.systems || [];
+      if (!systems.some(system => system.name === currentSystemName)) currentSystemName = systems[0]?.name || '';
+      byId('systemSelect').innerHTML = systems.length
+        ? systems.slice().sort((a, b) => a.name.localeCompare(b.name)).map(system => '<option value="' + escapeHtml(system.name) + '" ' + (system.name === currentSystemName ? 'selected' : '') + '>' + escapeHtml(system.name) + '</option>').join('')
+        : '<option value="">No systems</option>';
+      const system = systemByName(currentSystemName);
+      byId('systemEditor').hidden = !system;
+      byId('systemEditorEmpty').hidden = Boolean(system);
+      byId('saveSystem').disabled = !system;
+      byId('deleteSystem').disabled = !system;
+      byId('newSystem').disabled = false;
+      if (!system) return;
+      byId('systemName').value = system.name;
+      byId('systemDescription').value = system.description;
+      byId('systemUrl').value = system.url;
+      byId('systemType').value = system.type;
+      byId('systemOutputs').innerHTML = optionMarkup('', system.name);
+      [...byId('systemOutputs').options].forEach(option => { option.selected = system.outputs.includes(option.value); });
+    }
+
+    function addTargetRow(target = { system: '', column: '' }) {
+      const row = document.createElement('div');
+      row.className = 'target-row';
+      row.innerHTML = '<div><label>Target system</label><select class="target-system"><option value="">Select system</option>' + optionMarkup(target.system) + '</select></div><div><label>Target column</label><input class="target-column" type="text" value="' + escapeHtml(target.column || '') + '"></div><button class="button danger" type="button">Remove</button>';
+      row.querySelector('button').onclick = () => row.remove();
+      byId('targetRows').appendChild(row);
+    }
+
+    function renderObjectEditor() {
+      const objects = currentCatalog?.objects || [];
+      if (!objects.some(object => object.id === currentObjectId)) currentObjectId = objects[0]?.id || '';
+      byId('objectSelect').innerHTML = objects.length
+        ? objects.slice().sort((a, b) => a.field.localeCompare(b.field)).map(object => '<option value="' + escapeHtml(object.id) + '" ' + (object.id === currentObjectId ? 'selected' : '') + '>' + escapeHtml(object.field || '(Unnamed)') + '</option>').join('')
+        : '<option value="">No data objects</option>';
+      const object = objects.find(item => item.id === currentObjectId);
+      byId('objectEditor').hidden = !object;
+      byId('objectEditorEmpty').hidden = Boolean(object);
+      byId('saveObject').disabled = !object;
+      byId('deleteObject').disabled = !object;
+      byId('newObject').disabled = false;
+      if (!object) return;
+      byId('objectField').value = object.field;
+      byId('objectDatatype').value = object.datatype;
+      byId('objectCriticality').value = object.criticality;
+      byId('sourceSystem').innerHTML = '<option value="">Select system</option>' + optionMarkup(object.source.system);
+      byId('sourceTable').value = object.source.table;
+      byId('sourceColumn').value = object.source.column;
+      byId('targetRows').innerHTML = '';
+      object.targets.forEach(addTargetRow);
+    }
+
+    function updateCatalogUi() {
+      syncGeneratedOnly();
+      renderCatalogSummary();
+      populateGraphFilters();
+      renderSystemEditor();
+      renderObjectEditor();
+      renderSystemGraph();
+      renderLineageGraph();
+      syncGeneratedOnly();
+    }
+
+    function createsSystemCycle(sourceName, outputs) {
+      const graph = new Map(currentCatalog.systems.map(system => [system.name, system.name === sourceName ? outputs : system.outputs]));
+      const visit = (name, path = new Set()) => {
+        if (path.has(name)) return true;
+        const nextPath = new Set(path);
+        nextPath.add(name);
+        return (graph.get(name) || []).some(output => visit(output, nextPath));
+      };
+      return visit(sourceName);
+    }
+
+    function options() {
+      return {
+        projectName: byId('projectName').value.trim() || 'Application',
+        includeTests: byId('tests').checked,
+        ignore: byId('ignore').value,
+        maxFileSize: Math.max(1, Number(byId('maxSize').value) || 1024) * 1024
+      };
+    }
+
+    function resetResults() {
+      generated = '';
+      currentCatalog = null;
+      currentSystemName = '';
+      currentObjectId = '';
+      systemPositions = {};
+      lineagePositions = {};
+      resetView(systemView);
+      resetView(lineageView);
+      byId('fileCount').textContent = '0';
+      byId('systemCount').textContent = '0';
+      byId('objectCount').textContent = '0';
+      byId('connectionCount').textContent = '0';
+      byId('systems').innerHTML = '<tr><td colspan="5" class="empty">Run an analysis to see detected systems.</td></tr>';
+      byId('warnings').innerHTML = '<li class="empty">Warnings and conservative fallbacks appear here.</li>';
+      byId('preview').value = '';
+      byId('download').disabled = true;
+      byId('headerDownload').disabled = true;
+      populateGraphFilters();
+      renderSystemEditor();
+      renderObjectEditor();
+      renderSystemGraph();
+      renderLineageGraph();
+    }
+
+    function resetView(view) {
+      view.x = 0;
+      view.y = 0;
+      view.scale = 1;
+    }
+
+    function systemByName(name) {
+      return currentCatalog?.systems.find(system => system.name === name);
+    }
+
+    function populateGraphFilters() {
+      const selectedSystem = byId('systemFilter').value;
+      const selectedLineageSystem = byId('lineageSystemFilter').value;
+      const selectedObject = byId('objectFilter').value;
+      const systems = (currentCatalog?.systems || []).slice().sort((a, b) => a.name.localeCompare(b.name));
+      const objects = (currentCatalog?.objects || []).slice().sort((a, b) => a.field.localeCompare(b.field));
+      const systemOptions = systems.map(system => '<option value="' + escapeHtml(system.name) + '">' + escapeHtml(system.name) + '</option>').join('');
+      byId('systemFilter').innerHTML = '<option value="">All systems</option>' + systemOptions;
+      byId('lineageSystemFilter').innerHTML = '<option value="">All systems</option>' + systemOptions;
+      byId('objectFilter').innerHTML = '<option value="">All data objects</option>' + objects.map(object => '<option value="' + escapeHtml(object.id) + '">' + escapeHtml(object.field) + '</option>').join('');
+      if (systems.some(system => system.name === selectedSystem)) byId('systemFilter').value = selectedSystem;
+      if (systems.some(system => system.name === selectedLineageSystem)) byId('lineageSystemFilter').value = selectedLineageSystem;
+      if (objects.some(object => object.id === selectedObject)) byId('objectFilter').value = selectedObject;
+    }
+
+    function autoSystemPositions() {
+      const systems = currentCatalog.systems;
+      const indegree = new Map(systems.map(system => [system.name, 0]));
+      const level = new Map(systems.map(system => [system.name, 0]));
+      for (const system of systems) for (const output of system.outputs) indegree.set(output, (indegree.get(output) || 0) + 1);
+      const queue = systems.filter(system => indegree.get(system.name) === 0).map(system => system.name);
+      const visited = new Set();
+      while (queue.length) {
+        const name = queue.shift();
+        if (visited.has(name)) continue;
+        visited.add(name);
+        for (const output of systemByName(name)?.outputs || []) {
+          level.set(output, Math.max(level.get(output) || 0, (level.get(name) || 0) + 1));
+          indegree.set(output, indegree.get(output) - 1);
+          if (indegree.get(output) === 0) queue.push(output);
+        }
+      }
+      const groups = new Map();
+      for (const system of systems) {
+        const column = visited.has(system.name) ? level.get(system.name) : 0;
+        if (!groups.has(column)) groups.set(column, []);
+        groups.get(column).push(system.name);
+      }
+      systemPositions = {};
+      for (const [column, names] of groups) names.sort().forEach((name, row) => {
+        systemPositions[name] = { x: 55 + Number(column) * 280, y: 50 + row * 105 };
+      });
+    }
+
+    function connectedSystems(root) {
+      if (!root) return new Set(currentCatalog.systems.map(system => system.name));
+      const visible = new Set([root]);
+      const queue = [root];
+      while (queue.length) {
+        const name = queue.shift();
+        const neighbors = [
+          ...(systemByName(name)?.outputs || []),
+          ...currentCatalog.systems.filter(system => system.outputs.includes(name)).map(system => system.name)
+        ];
+        for (const neighbor of neighbors) if (!visible.has(neighbor)) {
+          visible.add(neighbor);
+          queue.push(neighbor);
+        }
+      }
+      return visible;
+    }
+
+    function edgePath(from, to, width, height) {
+      const x1 = from.x + width;
+      const y1 = from.y + height / 2;
+      const x2 = to.x;
+      const y2 = to.y + height / 2;
+      const middle = (x1 + x2) / 2;
+      return `M${x1},${y1} C${middle},${y1} ${middle},${y2} ${x2},${y2}`;
+    }
+
+    function renderSystemGraph() {
+      if (!currentCatalog) {
+        byId('systemGraph').innerHTML = '<text x="700" y="340" text-anchor="middle" fill="#9fb0c7">Open or generate a catalog to visualize systems.</text>';
+        byId('systemGraph').setAttribute('viewBox', '0 0 1400 700');
+        byId('systemGraphStats').textContent = 'No catalog loaded';
+        return;
+      }
+      if (currentCatalog.systems.some(system => !systemPositions[system.name])) {
+        const existing = { ...systemPositions };
+        autoSystemPositions();
+        for (const [name, position] of Object.entries(existing)) if (systemPositions[name]) systemPositions[name] = position;
+      }
+      const visible = connectedSystems(byId('systemFilter').value);
+      const systems = currentCatalog.systems.filter(system => visible.has(system.name));
+      const width = 190;
+      const height = 66;
+      let edges = '';
+      let edgeCount = 0;
+      for (const system of systems) for (const output of system.outputs) {
+        if (!visible.has(output) || !systemPositions[system.name] || !systemPositions[output]) continue;
+        edgeCount += 1;
+        edges += '<path class="edge" data-a="' + escapeHtml(system.name) + '" data-b="' + escapeHtml(output) + '" marker-end="url(#systemArrow)" d="' + edgePath(systemPositions[system.name], systemPositions[output], width, height) + '"/>';
+      }
+      const nodes = systems.map(system => {
+        const position = systemPositions[system.name];
+        const linked = httpUrl(system.url) ? ' linked' : '';
+        return '<g class="node draggable ' + system.type + linked + '" data-id="' + escapeHtml(system.name) + '" transform="translate(' + position.x + ' ' + position.y + ')"><rect width="' + width + '" height="' + height + '"/><text x="12" y="27">' + escapeHtml(system.name) + '</text><text class="sub" x="12" y="49">' + escapeHtml(typeLabels[system.type]) + ' · ' + system.outputs.length + ' output(s)</text></g>';
+      }).join('');
+      byId('systemGraph').innerHTML = '<defs><marker id="systemArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#94a3b8"/></marker></defs><g id="systemViewport">' + edges + nodes + '</g>';
+      byId('systemGraph').setAttribute('viewBox', '0 0 1400 700');
+      applyView(byId('systemGraph'), 'systemViewport', systemView);
+      byId('systemGraphStats').textContent = systems.length + ' systems · ' + edgeCount + ' connections';
+      enableGraphInteraction(byId('systemGraph'), systemPositions, systemView, 'systemViewport', width, height);
+      byId('systemGraph').querySelectorAll('.node').forEach(node => {
+        node.addEventListener('mouseenter', () => showSystemInfo(node.dataset.id));
+        node.addEventListener('mouseleave', () => showSystemInfo(''));
+        node.addEventListener('click', event => {
+          if (node.dataset.dragged === '1') {
+            node.dataset.dragged = '0';
+            return;
+          }
+          event.stopPropagation();
+          openSystemUrl(node.dataset.id);
+        });
+      });
+    }
+
+    function showSystemInfo(name) {
+      const system = systemByName(name);
+      byId('systemInfo').textContent = system
+        ? (system.description || 'No source evidence available.') + (system.url ? '\nWeb address: ' + system.url : '')
+        : 'Hover over a system for evidence. Select a linked system to open its web address.';
+    }
+
+    function openSystemUrl(name) {
+      const url = httpUrl(systemByName(name)?.url);
+      if (url) window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    function selectedLineageObjects() {
+      if (!currentCatalog) return [];
+      const objectId = byId('objectFilter').value;
+      const systemName = byId('lineageSystemFilter').value;
+      return currentCatalog.objects.filter(object =>
+        (!objectId || object.id === objectId) &&
+        (!systemName || object.source?.system === systemName || object.targets.some(target => target.system === systemName))
+      );
+    }
+
+    function autoLineagePositions(nodes) {
+      const sourceSystems = nodes.filter(node => node.role === 'source');
+      const objects = nodes.filter(node => node.type === 'object');
+      const otherSystems = nodes.filter(node => node.type !== 'object' && node.role !== 'source');
+      lineagePositions = {};
+      sourceSystems.forEach((node, index) => { lineagePositions[node.id] = { x: 45, y: 45 + index * 90 }; });
+      objects.forEach((node, index) => { lineagePositions[node.id] = { x: 420, y: 45 + index * 90 }; });
+      otherSystems.forEach((node, index) => { lineagePositions[node.id] = { x: 795, y: 45 + index * 90 }; });
+    }
+
+    function renderLineageGraph(forceLayout = false) {
+      if (!currentCatalog) {
+        byId('lineageGraph').innerHTML = '<text x="700" y="340" text-anchor="middle" fill="#9fb0c7">Open or generate a catalog to visualize lineage.</text>';
+        byId('lineageGraph').setAttribute('viewBox', '0 0 1400 700');
+        byId('lineageGraphStats').textContent = 'No catalog loaded';
+        return;
+      }
+      const objects = selectedLineageObjects();
+      const nodes = new Map();
+      const edges = [];
+      for (const object of objects) {
+        const objectId = 'O:' + object.id;
+        nodes.set(objectId, { id: objectId, name: object.field, type: 'object', role: 'object' });
+        if (object.source?.system) {
+          const system = systemByName(object.source.system);
+          nodes.set('S:' + object.source.system, { id: 'S:' + object.source.system, name: object.source.system, type: system?.type || 'application', role: 'source' });
+          edges.push(['S:' + object.source.system, objectId]);
+        }
+        for (const target of object.targets || []) {
+          const id = 'S:' + target.system;
+          const system = systemByName(target.system);
+          if (!nodes.has(id)) nodes.set(id, { id, name: target.system, type: system?.type || 'application', role: 'target' });
+          edges.push([objectId, id]);
+        }
+      }
+      const nodeList = [...nodes.values()];
+      if (forceLayout || nodeList.some(node => !lineagePositions[node.id])) autoLineagePositions(nodeList);
+      const width = 185;
+      const height = 62;
+      const edgeMarkup = edges.map(([from, to]) => '<path class="edge" data-a="' + escapeHtml(from) + '" data-b="' + escapeHtml(to) + '" marker-end="url(#lineageArrow)" d="' + edgePath(lineagePositions[from], lineagePositions[to], width, height) + '"/>').join('');
+      const nodeMarkup = nodeList.map(node => {
+        const position = lineagePositions[node.id];
+        const linked = node.type !== 'object' && httpUrl(systemByName(node.name)?.url) ? ' linked' : '';
+        return '<g class="node draggable ' + node.type + linked + '" data-id="' + escapeHtml(node.id) + '" transform="translate(' + position.x + ' ' + position.y + ')"><rect width="' + width + '" height="' + height + '"/><text x="12" y="26">' + escapeHtml(node.name) + '</text><text class="sub" x="12" y="47">' + escapeHtml(typeLabels[node.type]) + '</text></g>';
+      }).join('');
+      byId('lineageGraph').innerHTML = '<defs><marker id="lineageArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0,10 3.5,0 7" fill="#94a3b8"/></marker></defs><g id="lineageViewport">' + edgeMarkup + nodeMarkup + '</g>';
+      byId('lineageGraph').setAttribute('viewBox', '0 0 1400 700');
+      applyView(byId('lineageGraph'), 'lineageViewport', lineageView);
+      byId('lineageGraphStats').textContent = objects.length + ' data objects · ' + nodeList.length + ' nodes · ' + edges.length + ' connections';
+      enableGraphInteraction(byId('lineageGraph'), lineagePositions, lineageView, 'lineageViewport', width, height);
+      byId('lineageGraph').querySelectorAll('.node[data-id^="S:"]').forEach(node => node.addEventListener('click', event => {
+        if (node.dataset.dragged === '1') {
+          node.dataset.dragged = '0';
+          return;
+        }
+        event.stopPropagation();
+        openSystemUrl(node.dataset.id.slice(2));
+      }));
+    }
+
+    function applyView(svg, viewportId, view) {
+      svg.querySelector('#' + viewportId)?.setAttribute('transform', `translate(${view.x} ${view.y}) scale(${view.scale})`);
+    }
+
+    function enableGraphInteraction(svg, positions, view, viewportId, nodeWidth, nodeHeight) {
+      let activeNode = null;
+      let pointerId = null;
+      let offset = { x: 0, y: 0 };
+      let panning = false;
+      let panStart = { x: 0, y: 0 };
+      const svgPoint = event => {
+        const point = svg.createSVGPoint();
+        const matrix = svg.getScreenCTM();
+        point.x = event.clientX;
+        point.y = event.clientY;
+        return matrix ? point.matrixTransform(matrix.inverse()) : point;
+      };
+      const graphPoint = event => {
+        const point = svgPoint(event);
+        return { x: (point.x - view.x) / view.scale, y: (point.y - view.y) / view.scale };
+      };
+      const updateEdges = () => svg.querySelectorAll('.edge[data-a][data-b]').forEach(path => {
+        const from = positions[path.dataset.a];
+        const to = positions[path.dataset.b];
+        if (from && to) path.setAttribute('d', edgePath(from, to, nodeWidth, nodeHeight));
+      });
+      svg.querySelectorAll('.draggable').forEach(node => node.onpointerdown = event => {
+        event.preventDefault();
+        event.stopPropagation();
+        activeNode = node;
+        pointerId = event.pointerId;
+        node.dataset.dragged = '0';
+        const point = graphPoint(event);
+        const position = positions[node.dataset.id];
+        offset = { x: point.x - position.x, y: point.y - position.y };
+        node.classList.add('selected');
+        node.setPointerCapture(pointerId);
+      });
+      svg.onpointerdown = event => {
+        if (event.target.closest('.draggable')) return;
+        event.preventDefault();
+        panning = true;
+        pointerId = event.pointerId;
+        const point = svgPoint(event);
+        panStart = { x: point.x - view.x, y: point.y - view.y };
+        svg.classList.add('panning');
+        svg.setPointerCapture(pointerId);
+      };
+      svg.onpointermove = event => {
+        if (event.pointerId !== pointerId) return;
+        if (activeNode) {
+          const point = graphPoint(event);
+          const id = activeNode.dataset.id;
+          positions[id] = { x: Math.round(point.x - offset.x), y: Math.round(point.y - offset.y) };
+          activeNode.dataset.dragged = '1';
+          activeNode.setAttribute('transform', `translate(${positions[id].x} ${positions[id].y})`);
+          updateEdges();
+        } else if (panning) {
+          const point = svgPoint(event);
+          view.x = point.x - panStart.x;
+          view.y = point.y - panStart.y;
+          applyView(svg, viewportId, view);
+        }
+      };
+      const finish = () => {
+        activeNode?.classList.remove('selected');
+        activeNode = null;
+        pointerId = null;
+        panning = false;
+        svg.classList.remove('panning');
+        if (currentCatalog) syncGeneratedOnly();
+      };
+      svg.onpointerup = finish;
+      svg.onpointercancel = finish;
+      svg.onlostpointercapture = finish;
+      svg.onwheel = event => {
+        event.preventDefault();
+        const point = svgPoint(event);
+        const oldScale = view.scale;
+        view.scale = Math.max(0.25, Math.min(4, oldScale * (event.deltaY < 0 ? 1.12 : 0.89)));
+        const graphX = (point.x - view.x) / oldScale;
+        const graphY = (point.y - view.y) / oldScale;
+        view.x = point.x - graphX * view.scale;
+        view.y = point.y - graphY * view.scale;
+        applyView(svg, viewportId, view);
+      };
+    }
+
+    function zoomGraph(svgId, viewportId, view, factor) {
+      const svg = byId(svgId);
+      const box = svg.viewBox.baseVal;
+      const centerX = box.x + box.width / 2;
+      const centerY = box.y + box.height / 2;
+      const oldScale = view.scale;
+      view.scale = Math.max(0.25, Math.min(4, oldScale * factor));
+      view.x = centerX - ((centerX - view.x) / oldScale) * view.scale;
+      view.y = centerY - ((centerY - view.y) / oldScale) * view.scale;
+      applyView(svg, viewportId, view);
+      syncGeneratedOnly();
+    }
+
+    function resetGraphView(svgId, viewportId, view) {
+      resetView(view);
+      applyView(byId(svgId), viewportId, view);
+      syncGeneratedOnly();
+    }
+
+    function exportSvg(svgId, filename) {
+      const source = byId(svgId);
+      const copy = source.cloneNode(true);
+      copy.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+      const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+      style.textContent = '.application rect{fill:#3b82f6}.datastructure rect{fill:#8b5cf6}.api rect{fill:#059669}.object rect{fill:#ec4899}.node rect{stroke:#ffffff99;stroke-width:2;rx:9}.node text{fill:white;font:13px sans-serif}.node .sub{fill:#e2e8f0;font:11px sans-serif}.edge{fill:none;stroke:#94a3b8;stroke-width:2.2}';
+      copy.prepend(style);
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(copy)], { type: 'image/svg+xml' }));
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    byId('folder').onchange = event => {
+      selectedFiles = [...event.target.files];
+      const root = selectedFiles[0]?.webkitRelativePath?.split('/')[0] || '';
+      if (root) byId('projectName').value = root;
+      byId('selection').textContent = selectedFiles.length + ' file(s) selected' + (root ? ' from ' + root : '');
+      byId('analyze').disabled = !selectedFiles.length;
+      byId('status').className = 'status';
+      byId('status').textContent = 'Ready to analyze. No source data leaves this page.';
+      resetResults();
+    };
+
+    byId('clear').onclick = () => {
+      selectedFiles = [];
+      byId('folder').value = '';
+      byId('selection').textContent = 'No folder selected';
+      byId('analyze').disabled = true;
+      byId('status').className = 'status';
+      byId('status').textContent = 'Select a repository. Files remain in this browser and are never uploaded.';
+      resetResults();
+    };
+
+    byId('analyze').onclick = async () => {
+      const settings = options();
+      byId('analyze').disabled = true;
+      byId('status').className = 'status';
+      byId('status').textContent = 'Reading supported source files…';
+      try {
+        const inputs = [];
+        for (const file of selectedFiles) {
+          const path = file.webkitRelativePath || file.name;
+          if (!SourceLineage.shouldAnalyzePath(path, settings)) {
+            inputs.push({ path, content: '', size: file.size });
+            continue;
+          }
+          if (file.size > settings.maxFileSize) {
+            inputs.push({ path, content: '', size: file.size });
+            continue;
+          }
+          inputs.push({ path, content: await file.text(), size: file.size });
+        }
+        const result = SourceLineage.analyze(inputs, settings);
+        setCatalog(result.catalog);
+        byId('fileCount').textContent = result.report.analyzedFiles;
+        const warnings = [...result.report.warnings];
+        if (result.report.skippedFiles) warnings.push(result.report.skippedFiles + ' file(s) were skipped by safety and scope filters.');
+        warnings.push('Static analysis cannot prove connections created dynamically at runtime; review the result before treating it as authoritative.');
+        byId('warnings').innerHTML = warnings.map(warning => '<li>' + escapeHtml(warning) + '</li>').join('');
+        byId('status').textContent = 'Analysis complete: ' + result.catalog.systems.length + ' systems and ' + result.catalog.objects.length + ' data objects found.';
+      } catch (error) {
+        byId('status').className = 'status error';
+        byId('status').textContent = error.message;
+        resetResults();
+      } finally {
+        byId('analyze').disabled = !selectedFiles.length;
+      }
+    };
+
+    function downloadCatalog() {
+      if (!currentCatalog) return;
+      syncGeneratedOnly();
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(new Blob([generated], { type: 'application/yaml' }));
+      link.download = 'source_lineage_catalog.yaml';
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function activatePage(pageId) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.toggle('active', tab.dataset.page === pageId));
+      document.querySelectorAll('.page').forEach(page => page.classList.toggle('active', page.id === pageId));
+      if (pageId === 'systemsPage') renderSystemGraph();
+      if (pageId === 'visualPage') renderLineageGraph();
+    }
+
+    function startEmptyCatalog(pageId = 'systemsPage') {
+      setCatalog(emptyCatalog());
+      byId('fileCount').textContent = '0';
+      byId('warnings').innerHTML = '<li>Empty catalog created for manual editing.</li>';
+      byId('status').className = 'status';
+      byId('status').textContent = 'New empty catalog ready. Add systems and data objects using the editor tabs.';
+      setEditorStatus('systemEditStatus', 'Empty catalog created. Select + New to add a system.');
+      setEditorStatus('objectEditStatus', '');
+      activatePage(pageId);
+    }
+
+    document.querySelectorAll('.tab').forEach(tab => { tab.onclick = () => activatePage(tab.dataset.page); });
+    byId('newCatalog').onclick = () => startEmptyCatalog();
+    byId('download').onclick = downloadCatalog;
+    byId('headerDownload').onclick = downloadCatalog;
+    byId('openCatalog').onchange = async event => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      try {
+        setCatalog(parseCatalogDocument(await file.text()));
+        byId('fileCount').textContent = '0';
+        byId('warnings').innerHTML = '<li>Existing catalog loaded for manual review and editing.</li>';
+        byId('status').className = 'status';
+        byId('status').textContent = 'Loaded ' + file.name + ': ' + currentCatalog.systems.length + ' systems and ' + currentCatalog.objects.length + ' data objects.';
+        setEditorStatus('systemEditStatus', 'Catalog loaded from ' + file.name + '.');
+        activatePage('systemsPage');
+      } catch (error) {
+        activatePage('analysisPage');
+        byId('status').className = 'status error';
+        byId('status').textContent = error.message;
+      } finally {
+        event.target.value = '';
+      }
+    };
+
+    byId('systemSelect').onchange = event => {
+      currentSystemName = event.target.value;
+      renderSystemEditor();
+      setEditorStatus('systemEditStatus', '');
+    };
+    byId('newSystem').onclick = () => {
+      if (!currentCatalog) setCatalog(emptyCatalog());
+      let name = 'NEW_SYSTEM';
+      let suffix = 1;
+      while (currentCatalog.systems.some(system => system.name === name)) name = 'NEW_SYSTEM_' + (++suffix);
+      currentCatalog.systems.push({ name, description: '', url: '', type: 'application', outputs: [] });
+      currentSystemName = name;
+      updateCatalogUi();
+      setEditorStatus('systemEditStatus', 'New system created. Edit its fields and select Save.');
+    };
+    byId('saveSystem').onclick = () => {
+      const system = systemByName(currentSystemName);
+      if (!system) return;
+      const oldName = system.name;
+      const name = byId('systemName').value.trim();
+      const url = byId('systemUrl').value.trim();
+      const outputs = [...byId('systemOutputs').selectedOptions].map(option => option.value).filter(output => output !== oldName && output !== name);
+      if (!name || currentCatalog.systems.some(item => item !== system && item.name.toLowerCase() === name.toLowerCase())) {
+        setEditorStatus('systemEditStatus', 'A unique system name is required.', true);
+        return;
+      }
+      if (url && !httpUrl(url)) {
+        setEditorStatus('systemEditStatus', 'The web address must use http:// or https://.', true);
+        return;
+      }
+      if (createsSystemCycle(oldName, outputs)) {
+        setEditorStatus('systemEditStatus', 'These outputs would create a cycle.', true);
+        return;
+      }
+      system.name = name;
+      system.description = byId('systemDescription').value;
+      system.url = url;
+      system.type = byId('systemType').value;
+      system.outputs = outputs;
+      if (name !== oldName) {
+        currentCatalog.systems.forEach(item => { item.outputs = item.outputs.map(output => output === oldName ? name : output); });
+        currentCatalog.objects.forEach(object => {
+          if (object.source.system === oldName) object.source.system = name;
+          object.targets.forEach(target => { if (target.system === oldName) target.system = name; });
+        });
+        if (systemPositions[oldName]) {
+          systemPositions[name] = systemPositions[oldName];
+          delete systemPositions[oldName];
+        }
+        if (lineagePositions['S:' + oldName]) {
+          lineagePositions['S:' + name] = lineagePositions['S:' + oldName];
+          delete lineagePositions['S:' + oldName];
+        }
+      }
+      currentSystemName = name;
+      updateCatalogUi();
+      setEditorStatus('systemEditStatus', 'System saved.');
+    };
+    byId('deleteSystem').onclick = () => {
+      const system = systemByName(currentSystemName);
+      if (!system) return;
+      currentCatalog.systems = currentCatalog.systems.filter(item => item !== system);
+      currentCatalog.systems.forEach(item => { item.outputs = item.outputs.filter(output => output !== system.name); });
+      currentCatalog.objects.forEach(object => {
+        if (object.source.system === system.name) object.source.system = '';
+        object.targets = object.targets.filter(target => target.system !== system.name);
+      });
+      delete systemPositions[system.name];
+      delete lineagePositions['S:' + system.name];
+      currentSystemName = currentCatalog.systems[0]?.name || '';
+      updateCatalogUi();
+      setEditorStatus('systemEditStatus', 'System deleted from the working catalog.');
+    };
+
+    byId('objectSelect').onchange = event => {
+      currentObjectId = event.target.value;
+      renderObjectEditor();
+      setEditorStatus('objectEditStatus', '');
+    };
+    byId('newObject').onclick = () => {
+      if (!currentCatalog) setCatalog(emptyCatalog());
+      const object = { id: uniqueId(), field: '', datatype: '', criticality: 'medium', source: { system: '', table: '', column: '' }, targets: [] };
+      currentCatalog.objects.push(object);
+      currentObjectId = object.id;
+      updateCatalogUi();
+      setEditorStatus('objectEditStatus', 'New data object created. Complete its fields and select Save.');
+    };
+    byId('saveObject').onclick = () => {
+      const object = currentCatalog?.objects.find(item => item.id === currentObjectId);
+      if (!object) return;
+      const field = byId('objectField').value.trim();
+      if (!field) {
+        setEditorStatus('objectEditStatus', 'A field name is required.', true);
+        return;
+      }
+      object.field = field;
+      object.datatype = byId('objectDatatype').value.trim();
+      object.criticality = byId('objectCriticality').value;
+      object.source = { system: byId('sourceSystem').value, table: byId('sourceTable').value.trim(), column: byId('sourceColumn').value.trim() };
+      object.targets = [...byId('targetRows').querySelectorAll('.target-row')].map(row => ({
+        system: row.querySelector('.target-system').value,
+        column: row.querySelector('.target-column').value.trim()
+      })).filter(target => target.system);
+      updateCatalogUi();
+      setEditorStatus('objectEditStatus', 'Data object saved.');
+    };
+    byId('deleteObject').onclick = () => {
+      if (!currentCatalog) return;
+      currentCatalog.objects = currentCatalog.objects.filter(object => object.id !== currentObjectId);
+      delete lineagePositions['O:' + currentObjectId];
+      currentObjectId = currentCatalog.objects[0]?.id || '';
+      updateCatalogUi();
+      setEditorStatus('objectEditStatus', 'Data object deleted from the working catalog.');
+    };
+    byId('addTarget').onclick = () => addTargetRow();
+
+    byId('systemFilter').onchange = renderSystemGraph;
+    byId('systemAuto').onclick = () => { if (!currentCatalog) return; autoSystemPositions(); renderSystemGraph(); syncGeneratedOnly(); };
+    byId('systemZoomIn').onclick = () => zoomGraph('systemGraph', 'systemViewport', systemView, 1.2);
+    byId('systemZoomOut').onclick = () => zoomGraph('systemGraph', 'systemViewport', systemView, 0.83);
+    byId('systemReset').onclick = () => resetGraphView('systemGraph', 'systemViewport', systemView);
+    byId('systemSvg').onclick = () => exportSvg('systemGraph', 'source_system_hierarchy.svg');
+    byId('objectFilter').onchange = () => renderLineageGraph(true);
+    byId('lineageSystemFilter').onchange = () => renderLineageGraph(true);
+    byId('lineageAuto').onclick = () => { if (!currentCatalog) return; renderLineageGraph(true); syncGeneratedOnly(); };
+    byId('lineageZoomIn').onclick = () => zoomGraph('lineageGraph', 'lineageViewport', lineageView, 1.2);
+    byId('lineageZoomOut').onclick = () => zoomGraph('lineageGraph', 'lineageViewport', lineageView, 0.83);
+    byId('lineageReset').onclick = () => resetGraphView('lineageGraph', 'lineageViewport', lineageView);
+    byId('lineageSvg').onclick = () => exportSvg('lineageGraph', 'source_data_lineage.svg');
+    resetResults();
+  </script>
+</body>
+</html>

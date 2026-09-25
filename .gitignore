@@ -1,0 +1,6 @@
+.claude/settings.local.json
+CLAUDE.local.md
+.github/copilot/settings.local.json
+.lineage-work/
+.lineage/
+node_modules/
