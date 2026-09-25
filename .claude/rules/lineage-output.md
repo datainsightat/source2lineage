@@ -12,14 +12,24 @@ IDs, directions, source/target mappings, counts, and terminology must agree.
 ## YAML
 
 - Write JSON syntax with a `.yaml` extension.
-- Conform to `schemas/data-lineage.schema.json`.
+- Conform to the canonical S2L specification at `https://github.com/datainsightat/s2l` and
+  S2L format version 6. Use `schemas/data-lineage.schema.json` as the local implementation
+  schema for validation.
+- Emit exactly four root members: `version`, `systems`, `objects`, and `layouts`. Do not add
+  evidence, metadata, extensions, or any other property to fixed S2L objects.
+- Require at least one evidence-confirmed system and one evidence-confirmed data object. Never
+  synthesize a placeholder or inventory object just to make the document schema-valid.
 - Sort systems by name, each system's outputs by name, objects by ID, and targets by system
   then column so repeated analysis is stable.
 - Use only `application`, `api`, or `datastructure` system types.
 - Use only `low`, `medium`, `high`, or `critical` criticality values.
+- Make every object ID match `^[A-Za-z0-9_.:-]+$`; keep `field` non-empty; and represent an
+  unknown datatype, source table, or source column as an empty string rather than omitting it.
 - Every output, source system, and target system must name an existing system.
-- Do not emit self-links, duplicate links, placeholder URLs, or evidence metadata outside the
-  schema.
+- Do not emit self-links, duplicate output names, duplicate `(target system, column)` pairs,
+  placeholder URLs, or non-HTTP(S) nonblank URLs.
+- Emit all four layout members. New catalogs use empty `systems` and `catalog` position maps
+  and `{ "x": 0, "y": 0, "scale": 1 }` for both viewports.
 - Keep evidence in Markdown; keep YAML compatible with the browser catalog.
 
 ## Markdown
@@ -34,4 +44,3 @@ IDs, directions, source/target mappings, counts, and terminology must agree.
 - Include the exact validator command used and its result.
 
 Run the validator after the final write. A pair that fails validation is not complete.
-

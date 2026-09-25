@@ -8,6 +8,19 @@ import { parseCatalog, validateCatalog, validateFiles, validateReport } from '..
 const root = path.dirname(fileURLToPath(import.meta.url));
 const fixture = name => path.join(root, 'fixtures', name);
 
+test('agent workflow targets the canonical S2L specification', () => {
+  const repository = path.join(root, '..');
+  const constitution = fs.readFileSync(path.join(repository, 'AGENTS.md'), 'utf8');
+  const workflow = fs.readFileSync(path.join(repository, '.claude', 'commands', 'lineage-analyze.md'), 'utf8');
+  const outputRules = fs.readFileSync(path.join(repository, '.claude', 'rules', 'lineage-output.md'), 'utf8');
+  for (const text of [constitution, outputRules]) {
+    assert.match(text, /https:\/\/github\.com\/datainsightat\/s2l/);
+    assert.match(text, /S2L.+version 6/is);
+  }
+  assert.match(workflow, /do not create a placeholder or source-inventory object/i);
+  assert.doesNotMatch(workflow, /create one conservative .*source inventory.* object/i);
+});
+
 test('accepts a compatible catalog and complete report', () => {
   const result = validateFiles(fixture('valid-data-lineage.yaml'), fixture('valid-system-analysis.md'));
   assert.deepEqual(result.errors, []);

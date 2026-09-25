@@ -10,11 +10,16 @@ codebase without executing its application code and produce two evidence-backed 
 
 ```yaml
 Source2LineageVersion: 1.0.0
+S2LSpecification: https://github.com/datainsightat/s2l
+S2LFormatVersion: 6
 OutputLanguage: English
 DefaultOutputDirectory: .lineage
 ```
 
-`OutputLanguage` governs generated prose. Schema keys and command names remain English.
+`S2LSpecification` is the canonical contract for `data-lineage.yaml`.
+`schemas/data-lineage.schema.json` is the local implementation schema used for deterministic
+offline validation and MUST remain compatible with S2L format version 6. `OutputLanguage`
+governs generated prose. Schema keys and command names remain English.
 
 ## Non-negotiables
 
@@ -24,6 +29,9 @@ DefaultOutputDirectory: .lineage
   dependency folders, VCS data, build output, caches, and binary files.
 - Every reported system, connection, and data object needs source evidence. Put uncertain
   findings in the Markdown report, not in the YAML graph.
+- Never fabricate a system or data object to satisfy an S2L minimum-item constraint. If the
+  analyzed scope has no confirmed system or no confirmed data object, report that a conforming
+  S2L catalog cannot be produced from the available evidence.
 - Never invent a web address, table, column, endpoint, dependency, or business purpose.
 - Treat comments and documentation as claims. Corroborate them with code or label them as
   documentation-only evidence.
@@ -75,8 +83,15 @@ Names locate candidates; file contents decide findings.
 ## Output contract
 
 Write the YAML artifact in JSON syntax. JSON is valid YAML 1.2 and avoids parser ambiguity.
-It must contain `version: 6`, `systems`, `objects`, and `layouts`; conform to
-`schemas/data-lineage.schema.json`; and pass `scripts/validate-output.mjs`.
+It must conform to the canonical S2L specification at `S2LSpecification`, contain exactly the
+root members `version`, `systems`, `objects`, and `layouts`, use `version: 6`, satisfy the local
+implementation schema at `schemas/data-lineage.schema.json`, and pass
+`scripts/validate-output.mjs`.
+
+S2L requires at least one system and one data object. System names and object IDs are unique;
+all output/source/target references resolve to systems in the same catalog; URLs are blank or
+HTTP(S); and fixed objects contain no extension fields. Systems, outputs, objects, and targets
+use the deterministic ordering defined in `docs/output-contract.md`.
 
 The Markdown artifact must use `templates/system-analysis.md` and contain:
 

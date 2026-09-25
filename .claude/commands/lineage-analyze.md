@@ -20,7 +20,8 @@ Defaults are `.` and `.lineage`. Resolve both to explicit paths. The two final f
 
 1. Confirm the source path exists and is a directory.
 2. Locate the Source2Lineage root by finding the `AGENTS.md` that declares
-   `Source2LineageVersion`; use its schema, template, and validator by resolved path.
+   `Source2LineageVersion`; read its `S2LSpecification` and `S2LFormatVersion` settings, then
+   use its local implementation schema, template, and validator by resolved path.
 3. Refuse an output directory inside a dependency, build, VCS, cache, secret, or generated
    directory.
 4. If either final file already exists, stop and ask once before replacing either file. One
@@ -113,8 +114,9 @@ file.
 
 - Create objects for confirmed SQL columns, contract fields, endpoint payload fields, message
   fields, or explicit file-record fields.
-- When fields cannot be confirmed, create one conservative `<system> source inventory` object
-  so the catalog remains reviewable, and explain this fallback prominently.
+- If no data object can be confirmed, do not create a placeholder or source-inventory object.
+  Record the evidence gap in `.lineage-work/`, stop before final-file creation, and report that
+  S2L v6 requires at least one evidence-confirmed object.
 - Preserve source table/contract and source column/field names.
 - Add targets only when a mapping, transfer, shared contract, or matching literal usage proves
   the flow. Matching names alone are insufficient.
@@ -138,6 +140,11 @@ Write `data-lineage.yaml` first in pretty-printed JSON syntax with:
 - `layouts.systems` and `layouts.catalog` as empty objects;
 - `layouts.systemView` and `layouts.catalogView` as `{ "x": 0, "y": 0, "scale": 1 }`.
 
+Before writing, apply the S2L conformance checklist in `.claude/rules/lineage-output.md`.
+Write only the four S2L root members and only the fields allowed by the S2L schema. If there
+is no confirmed system or object, do not write either final artifact and do not claim a
+successful analysis.
+
 Then copy `templates/system-analysis.md` as the structural template and fill every section from
 the same normalized model. Delete template guidance and placeholders. The Evidence index must
 cover every YAML system and every edge, plus grouped evidence for all data objects. The report
@@ -155,9 +162,10 @@ node <Source2Lineage-root>/scripts/validate-output.mjs <output>/data-lineage.yam
 
 Fix every validator error. Then manually compare system/object/connection counts, verify that
 every report system occurs in YAML, and sample at least three evidence references against the
-source. Record the successful command in the report's reproduction section.
+source. Also verify the catalog against the S2L reference, uniqueness, ordering, URL, ID, and
+closed-object rules in `.claude/rules/lineage-output.md`. Record the successful command in the
+report's reproduction section.
 
 After success, remove `.lineage-work/`. Report the two output paths, counts, important static
 analysis limitations, and the validator result. If validation fails and cannot be corrected,
 leave `.lineage-work/` intact and report the exact blocker; never claim completion.
-

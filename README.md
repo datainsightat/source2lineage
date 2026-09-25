@@ -29,7 +29,7 @@ There is no analysis server, package install, or application instrumentation.
 - Detects HTTP, GraphQL, and gRPC servers and clients from explicit source evidence.
 - Detects SQL schemas, reads, writes, migrations, and explicit ORM mappings.
 - Detects explicit queues, topics, messages, file exchanges, and object-store flows.
-- Produces a browser-compatible version 6 lineage catalog.
+- Produces a browser-compatible catalog conforming to the S2L version 6 specification.
 - Separates confirmed findings from probable or runtime-only behavior.
 - Uses isolated scout agents for large repositories when the host supports delegation.
 - Validates schema, references, report completeness, and cross-file consistency before handoff.
@@ -168,7 +168,8 @@ The Markdown report includes:
 - probable findings, blind spots, and static-analysis limitations;
 - the validator command and result.
 
-See [Output Contract](docs/output-contract.md) for the schema and a complete example.
+See [Output Contract](docs/output-contract.md) for Source2Lineage's S2L generation rules and a
+complete example.
 
 ## Agent workflow
 
@@ -214,7 +215,7 @@ npm test
 
 The validator checks:
 
-- version 6 schema shape;
+- S2L version 6 schema shape;
 - system types, criticality values, and URL protocols;
 - unique system names and object IDs;
 - valid outputs and source/target references;

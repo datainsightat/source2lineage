@@ -3,6 +3,11 @@
 Every successful `/lineage-analyze` run creates exactly one YAML catalog and one Markdown
 report. They represent the same model at different levels of detail.
 
+The canonical catalog contract is the
+[`datainsightat/s2l` specification](https://github.com/datainsightat/s2l), format version 6.
+This document adds Source2Lineage generation and report requirements; it does not redefine
+the S2L format.
+
 ## `data-lineage.yaml`
 
 The file uses pretty-printed JSON syntax, which is valid YAML 1.2 and can be opened directly in
@@ -52,9 +57,24 @@ The file uses pretty-printed JSON syntax, which is valid YAML 1.2 and can be ope
 }
 ```
 
-The normative machine schema is `schemas/data-lineage.schema.json`. Additional consistency
-rules enforced by the validator include unique system names and object IDs, valid references,
-no self-links, no duplicate outputs, and HTTP/HTTPS-only nonblank URLs.
+The canonical machine schema is published by S2L. The local
+`schemas/data-lineage.schema.json` is Source2Lineage's implementation copy for offline
+validation. Additional consistency rules enforced by the validator include unique system
+names and object IDs, valid references, no self-links, no duplicate outputs or target pairs,
+and HTTP/HTTPS-only nonblank URLs.
+
+S2L conformance also requires:
+
+- exactly `version`, `systems`, `objects`, and `layouts` at the root;
+- at least one system and one data object;
+- only schema-defined fields in systems, objects, mappings, positions, and viewports;
+- object IDs matching `^[A-Za-z0-9_.:-]+$`;
+- every output, source, and target system reference resolving within the catalog;
+- all four layout members, with a positive viewport scale.
+
+Source2Lineage MUST NOT invent a placeholder data object when analysis finds no confirmed
+field. Such a run cannot produce a conforming S2L catalog and must report the evidence gap
+instead of writing misleading final artifacts.
 
 Collections are deterministic:
 

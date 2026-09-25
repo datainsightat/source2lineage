@@ -7,6 +7,8 @@ disable-model-invocation: true
 # /lineage-validate — Check an artifact pair
 
 Read `AGENTS.md`, `.claude/rules/lineage-output.md`, and `docs/output-contract.md` first.
+Treat the S2L specification named by `S2LSpecification` in `AGENTS.md` as the canonical YAML
+contract; the local schema and validator are implementation checks for that contract.
 
 Require two arguments: the YAML path and Markdown path. Resolve them explicitly and perform
 read-only checks; do not modify either file unless the user separately asks for fixes.
@@ -18,6 +20,8 @@ read-only checks; do not modify either file unless the user separately asks for 
    - every flow direction described in prose agrees with `outputs` and object targets;
    - every evidence reference is repository-relative and plausibly locates a source fact;
    - probable/unknown findings did not leak into YAML as confirmed facts;
+   - the catalog obeys the S2L closed-object, minimum-item, ID, URL, reference, uniqueness, and
+     deterministic-ordering rules;
    - the reproduction section records the validation command.
 3. Return `VALID` only when the automated and manual checks pass. Otherwise return `INVALID`
    followed by concrete, path-specific findings grouped as schema, consistency, evidence, or
@@ -25,4 +29,3 @@ read-only checks; do not modify either file unless the user separately asks for 
 
 Do not soften an automated failure into a warning. Do not claim that static analysis proves
 runtime completeness.
-
