@@ -44,10 +44,16 @@ network commands.
 
 Inventory:
 
-- manifests and their containing directories;
+- Maven/Gradle Java and Kotlin projects; Perl `cpanfile`, `Makefile.PL`, `Build.PL`, and
+  `dist.ini` projects; and other manifests with their containing directories;
 - workspace/project references and local dependencies;
-- application entrypoints and route registration;
-- SQL files, migrations, ORM mappings, repositories, and connection configuration;
+- Java/Kotlin and Perl application entrypoints and route registration;
+- SQL files, migrations, views, stored procedures, ORM mappings, repositories, and connection
+  configuration;
+- MongoDB client configuration, databases, collections, validators, document models, and
+  literal reads/writes;
+- JSON/JSONL schemas, models, mappings, and explicit readers/writers;
+- CSV/TSV headers, mappings, parser/writer configuration, and explicit readers/writers;
 - HTTP/GraphQL/gRPC clients and servers;
 - message producers/consumers plus topic or queue declarations;
 - file and object-store reads/writes;
@@ -80,6 +86,8 @@ Every scout delegation must state:
   `docs/detection-guide.md` are authoritative;
 - that it may write only its report, must not execute code, and must return at most five lines;
 - the required report sections from the evidence rule.
+- which of Java, Kotlin, Perl, SQL, MongoDB, JSON, CSV, or analogous technologies occur in the
+  assigned unit so the scout applies the corresponding detection-guide rules.
 
 After each report, verify that it has all required sections and at least one concrete evidence
 reference for every confirmed finding. Mark the worklist row done only after this check. If a
@@ -107,17 +115,25 @@ file.
   boundaries.
 - An exposed API gets its own API system when route/contract evidence exists.
 - SQL writes point application → data structure; reads point data structure → application.
+- MongoDB inserts, updates, replacements, deletes, and bulk writes point application →
+  collection; finds, queries, and aggregations point collection → application.
+- JSON/CSV writes point application → logical file store or exchange; reads point file store
+  or exchange → application. A format or filename alone does not establish direction.
 - Deduplicate edges, remove self-links, and ensure every endpoint names a retained system.
 - Put dynamic or contradictory direction in the report's uncertainty section, not the graph.
 
 ### Reconcile data objects
 
-- Create objects for confirmed SQL columns, contract fields, endpoint payload fields, message
-  fields, or explicit file-record fields.
+- Create objects for confirmed SQL columns, MongoDB document fields, JSON properties, CSV
+  columns, contract fields, endpoint payload fields, message fields, or explicit file-record
+  fields.
 - If no data object can be confirmed, do not create a placeholder or source-inventory object.
   Record the evidence gap in `.lineage-work/`, stop before final-file creation, and report that
   S2L v6 requires at least one evidence-confirmed object.
 - Preserve source table/contract and source column/field names.
+- In S2L `source.table`, preserve the physical or logical container name: SQL table/view,
+  MongoDB collection, JSON record/file contract, or CSV dataset. Preserve target paths such as
+  nested MongoDB/JSON properties and CSV column names in target `column`.
 - Add targets only when a mapping, transfer, shared contract, or matching literal usage proves
   the flow. Matching names alone are insufficient.
 - Assign criticality conservatively: `critical` for credentials, government identifiers, or

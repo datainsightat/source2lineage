@@ -23,6 +23,21 @@ test('agent workflow targets the canonical S2L specification', () => {
   assert.doesNotMatch(workflow, /create one conservative .*source inventory.* object/i);
 });
 
+test('agent workflow covers the primary stack and analogous technologies', () => {
+  const repository = path.join(root, '..');
+  const constitution = fs.readFileSync(path.join(repository, 'AGENTS.md'), 'utf8');
+  const workflow = fs.readFileSync(path.join(repository, '.claude', 'commands', 'lineage-analyze.md'), 'utf8');
+  const guide = fs.readFileSync(path.join(repository, 'docs', 'detection-guide.md'), 'utf8');
+  const scout = fs.readFileSync(path.join(repository, '.claude', 'agents', 'lineage-scout.md'), 'utf8');
+  for (const technology of ['Java', 'Kotlin', 'Perl', 'SQL', 'MongoDB', 'JSON', 'CSV']) {
+    for (const text of [constitution, workflow, guide, scout]) assert.match(text, new RegExp(`\\b${technology}\\b`, 'i'));
+  }
+  assert.match(guide, /## Analogous technologies/);
+  assert.match(guide, /do not reproduce JSON values or\s+CSV rows/i);
+  assert.match(workflow, /MongoDB inserts, updates, replacements, deletes, and bulk writes point application/i);
+  assert.match(workflow, /JSON\/CSV writes point application/i);
+});
+
 test('recognizes Perl projects and standalone SQL source files', () => {
   for (const file of [
     'service/cpanfile',

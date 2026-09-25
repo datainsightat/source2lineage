@@ -29,6 +29,8 @@ There is no analysis server, package install, or application instrumentation.
 - Detects HTTP, GraphQL, and gRPC servers and clients from explicit source evidence.
 - Detects SQL schemas, reads, writes, migrations, and explicit ORM mappings.
 - Analyzes Perl projects and modules alongside standalone or embedded SQL.
+- Prioritizes Java/Kotlin, Perl, SQL, MongoDB, JSON, and CSV with evidence rules that extend to
+  analogous document stores and structured formats.
 - Detects explicit queues, topics, messages, file exchanges, and object-store flows.
 - Produces a browser-compatible catalog conforming to the S2L version 6 specification.
 - Separates confirmed findings from probable or runtime-only behavior.

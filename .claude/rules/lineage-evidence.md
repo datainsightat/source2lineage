@@ -24,6 +24,12 @@ the source, target, mechanism, direction evidence, and evidence path. For every 
 record the field, datatype, criticality suggestion, source mapping, target mappings, and
 evidence.
 
+For database or file evidence, also record the technology, logical database/store, physical
+container (SQL table/view, MongoDB collection, JSON contract/file, or CSV dataset), operation
+(`read` or `write`), and the literal API/query/configuration that proves direction. For nested
+MongoDB or JSON fields, preserve dotted property paths. For CSV, cite header or mapping
+configuration only; do not include data rows.
+
 Evidence references are repository-relative `path:line` locations. Include a symbol or config
 key when one finding spans several lines. Short snippets may be used only when needed to
 disambiguate direction; never copy secrets or large source passages.
@@ -34,8 +40,11 @@ Do not promote these to confirmed evidence on their own:
 - README claims without code/config corroboration;
 - comments describing intended behavior;
 - dynamically assembled URLs or SQL whose resolved value is not visible;
+- dynamically assembled MongoDB collection names or file paths whose resolved value is not
+  visible;
+- a `.json` or `.csv` filename without code/configuration proving how it participates in a
+  flow;
 - framework conventions without their registration or configuration site.
 
 Scout reports may overlap at boundaries. Record the touchpoint and stop; the orchestrator
 deduplicates and resolves disagreement during synthesis.
-

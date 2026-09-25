@@ -56,17 +56,26 @@ Only confirmed findings enter `data-lineage.yaml`. Probable and unknown findings
 Inspect common manifests (`package.json`, `pyproject.toml`, `pom.xml`, Gradle builds,
 `.csproj`, `.fsproj`, `go.mod`, `Cargo.toml`, `composer.json`, `Gemfile`, `mix.exs`,
 `cpanfile`, `Makefile.PL`, `Build.PL`, `dist.ini`) to find project boundaries and explicit
-metadata. Inspect supported application source, including Perl, and SQL source for:
+metadata. Prioritize Java, Kotlin, Perl, SQL, MongoDB, JSON, and CSV evidence while applying
+the same evidence rules to analogous technologies. Inspect supported source for:
 
 - local imports and project references;
 - HTTP route declarations and literal HTTP client calls;
 - SQL DDL plus literal reads and writes;
 - explicit ORM entities, mappings, migrations, and connection configuration;
+- MongoDB collection declarations, validators, models, and literal read/write operations;
+- JSON Schema, serialization models, property mappings, and explicit JSON reads/writes;
+- CSV headers, parser/writer mappings, and explicit CSV reads/writes;
 - explicit message topics, queues, producers, and consumers;
 - explicit file/object-store reads and writes;
 - GraphQL and protobuf contracts where producer/consumer ownership is visible.
 
 Names locate candidates; file contents decide findings.
+
+For JSON, inspect schemas, keys, and mappings rather than copying data values. For CSV, inspect
+only headers, schemas, and parser/writer configuration; never reproduce record rows. Treat
+connection strings and MongoDB URIs as potentially sensitive: record only non-secret logical
+database or collection names and never emit credentials.
 
 ## System and flow semantics
 
@@ -75,6 +84,9 @@ Names locate candidates; file contents decide findings.
 - A database, table grouping, stream, queue, file store, or equivalent persisted structure is
   a `datastructure`.
 - `outputs` point from producer/caller/writer to consumer/callee/store.
+- SQL and MongoDB writes point from the application to the data structure; reads point from
+  the data structure to the application. File writes follow application → file store, and file
+  reads follow file store → application.
 - Data-object `source` is the earliest confirmed origin in the analyzed scope.
 - Data-object `targets` are confirmed downstream representations. Preserve target column or
   field names when visible.

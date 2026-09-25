@@ -23,6 +23,40 @@ The nearest supported manifest owns a source file. Common manifests are:
 Workspace declarations and explicit project references are stronger boundary evidence than
 folder layout. A root-only repository without a manifest becomes one fallback application.
 
+## Stack-specific source discovery
+
+The primary stack is Java, Kotlin, Perl, SQL, MongoDB, JSON, and CSV. This is a priority list,
+not a closed allowlist: apply the **Analogous technologies** rule below when the repository
+uses another framework, document database, or structured file format.
+
+### Java and Kotlin
+
+Inspect `.java`, `.kt`, and `.kts` source under Maven and Gradle project boundaries. Direct
+evidence includes:
+
+- Spring MVC/WebFlux annotations and functional routes, JAX-RS declarations, and Ktor routes;
+- `HttpClient`, Spring `WebClient`/`RestTemplate`, Feign, Retrofit, and generated-client calls
+  with literal or explicitly configured targets;
+- JPA/Hibernate entities, JDBC and jOOQ statements, Spring Data repositories, Kotlin Exposed
+  tables/queries, and migration resources;
+- Jackson, Gson, kotlinx.serialization, JSON Schema, CSV bindings, and explicit field-name
+  annotations that prove serialized names.
+
+Framework dependencies alone identify candidates; route, query, model, or registration syntax
+is required to confirm lineage.
+
+### Perl
+
+Inspect `.pl`, `.pm`, `.psgi`, and included `.t` files within `cpanfile`, `Makefile.PL`,
+`Build.PL`, or `dist.ini` boundaries. Direct evidence includes:
+
+- `use`/`require` statements resolving to local modules;
+- Dancer/Dancer2 or Mojolicious literal routes and literal user-agent calls;
+- DBI SQL, MongoDB driver collection operations, JSON encode/decode mappings, and
+  `Text::CSV`/equivalent header and column mappings.
+
+Module names and CPAN dependencies alone do not prove a data flow.
+
 ## Local dependencies
 
 Confirmed cross-project edges include:
@@ -38,11 +72,10 @@ prove a dependency.
 ## HTTP and RPC
 
 Server evidence includes literal route declarations and registered controllers/handlers in
-JavaScript/TypeScript, Python, Java, .NET, Go, and Perl (including Dancer-style and
-Mojolicious-style literal routes), plus GraphQL resolvers/schemas and protobuf service
-implementations. Client evidence includes literal `fetch`, Axios, Requests, HttpClient,
-RestTemplate/WebClient, Go HTTP, Perl user-agent calls, and generated-client calls whose target
-contract is visible.
+Java/Kotlin (including Spring, JAX-RS, and Ktor), Perl (including Dancer and Mojolicious), and
+other supported languages, plus GraphQL resolvers/schemas and protobuf service
+implementations. Client evidence includes literal Java/Kotlin HTTP-client calls, Perl
+user-agent calls, and generated-client calls whose target contract is visible.
 
 An exposed boundary becomes an `api` system. A caller-to-API edge needs a literal compatible
 path/method, a generated client bound to the contract, or explicit configuration linking the
@@ -77,6 +110,63 @@ application reads table   → data structure → application
 Columns become data objects when their declarations or mappings are visible. `SELECT *`
 proves table access, not individual fields, unless the schema is also present.
 
+## MongoDB and document stores
+
+Confirmed MongoDB evidence includes literal database or collection selection, Spring Data
+`@Document` mappings, Java/Kotlin codec or document models, Perl MongoDB driver calls,
+`mongosh` scripts, collection validators, and explicit aggregation pipelines.
+
+Direction rules:
+
+```text
+insert/update/replace/delete/bulk write → application → collection
+find/query/aggregate/change-stream read → collection → application
+```
+
+Create a `datastructure` for a logical collection when its name and role are explicit. Do not
+create one collection per unresolved runtime value. A database name without a collection may
+support a database-level structure only when the analyzed operations genuinely work at that
+level.
+
+Document fields require a validator, typed/annotated model, codec mapping, projection,
+aggregation stage, or literal document mapping. Preserve nested fields as dotted paths when
+the code exposes them. A schemaless collection name alone does not prove fields. Treat dynamic
+collection names, computed property paths, and unexpanded pipelines as uncertainty.
+
+MongoDB URIs may contain credentials. Never reproduce a connection string; retain only safe,
+explicit logical database and collection names. Since S2L `url` permits only HTTP(S), MongoDB
+connection URIs do not belong in that field.
+
+## JSON and CSV
+
+JSON and CSV participate in lineage only when code or configuration establishes a read,
+write, contract, or mapping. A file extension by itself is insufficient.
+
+For JSON, confirmed field evidence includes JSON Schema, Jackson/Gson/kotlinx.serialization
+models and annotations, Perl JSON mappings, explicit object construction, or parser/writer
+property mappings. Treat JSONL and NDJSON as JSON record streams under the same rules. Record
+nested properties as dotted paths when visible.
+
+For CSV/TSV, confirmed field evidence includes a literal header, declared column list, typed
+binding, or parser/writer mapping such as Apache Commons CSV, OpenCSV, Jackson CSV, or Perl
+`Text::CSV`. Headerless positional data requires an explicit index-to-field mapping; never
+invent names from sample values.
+
+Direction rules:
+
+```text
+application serializes/writes JSON or CSV → application → file store/exchange
+application parses/reads JSON or CSV      → file store/exchange → application
+```
+
+Represent a stable logical file collection, feed, bucket, or exchange as a `datastructure`;
+do not create a system for every incidental file. Use the S2L source `table` field for the
+logical JSON contract/file or CSV dataset and `column` for the property path or column name.
+
+Inspect schemas, property names, headers, and mappings only. Do not reproduce JSON values or
+CSV rows, and do not inspect suspected production dumps or files containing credentials or
+personal records merely to infer a schema.
+
 ## Messages and events
 
 A topic or queue becomes a data structure when its name and role are explicit. Producer calls
@@ -99,6 +189,21 @@ Record fields require a schema, serialization model, column/header mapping, or p
 GraphQL schemas, protobuf definitions, OpenAPI files, JSON Schema, and typed DTOs can prove
 field names and datatypes. They prove direction only when ownership and producer/consumer
 wiring are also visible.
+
+## Analogous technologies
+
+Do not ignore an integration solely because its library or format is not named above. Apply
+the closest established rule when direct syntax proves all of the following:
+
+1. the owning application or boundary;
+2. the logical data structure or API;
+3. whether the operation reads or writes;
+4. the container and fields being transferred.
+
+For example, another document database follows the MongoDB evidence and direction rules, and
+another delimited or structured file format follows the CSV/JSON rules. If one of these facts
+is dynamic or unresolved, record the candidate under uncertainties instead of generalizing
+from a package name.
 
 ## Criticality suggestions
 
