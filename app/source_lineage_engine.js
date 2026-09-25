@@ -12,14 +12,16 @@
   ]);
   const SOURCE_EXTENSIONS = new Set([
     '.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx', '.py', '.java', '.cs', '.go', '.rs',
-    '.sql', '.graphql', '.gql', '.proto', '.json', '.toml', '.xml', '.gradle', '.kts',
+    '.pl', '.pm', '.psgi', '.t', '.sql', '.ddl', '.dml', '.psql', '.graphql', '.gql', '.proto',
+    '.json', '.toml', '.xml', '.gradle', '.kts',
     '.yaml', '.yml'
   ]);
   const FIXED_MANIFESTS = new Set([
     'package.json', 'pyproject.toml', 'pom.xml', 'build.gradle', 'build.gradle.kts', 'go.mod',
-    'cargo.toml', 'composer.json', 'gemfile', 'mix.exs'
+    'cargo.toml', 'composer.json', 'gemfile', 'mix.exs', 'cpanfile', 'makefile.pl', 'build.pl',
+    'dist.ini'
   ]);
-  const TEST_SEGMENTS = new Set(['test', 'tests', '__tests__', 'spec', 'specs', 'fixtures', '__fixtures__']);
+  const TEST_SEGMENTS = new Set(['test', 'tests', 't', '__tests__', 'spec', 'specs', 'fixtures', '__fixtures__']);
 
   function normalizePath(value) {
     const parts = String(value || '').replace(/\\/g, '/').split('/');
@@ -111,6 +113,12 @@
       displayName = packageName.split('/').pop();
     } else if (name === 'cargo.toml') {
       displayName = firstMatch(text, /^name\s*=\s*["']([^"']+)["']/m);
+      packageName = displayName;
+    } else if (name === 'makefile.pl' || name === 'build.pl') {
+      displayName = firstMatch(text, /\b(?:NAME|module_name)\s*(?:=>|=)\s*["']([^"']+)["']/i);
+      packageName = displayName;
+    } else if (name === 'dist.ini') {
+      displayName = firstMatch(text, /^name\s*=\s*([^\s;#]+)\s*$/mi);
       packageName = displayName;
     } else if (name.startsWith('build.gradle')) {
       displayName = firstMatch(text, /rootProject\.name\s*=\s*["']([^"']+)["']/);
@@ -217,6 +225,8 @@
       collect(/["']([^"']+)["']/g);
     } else if (ext === '.rs') {
       collect(/^\s*(?:use|extern\s+crate)\s+([A-Za-z_][\w:]*)/gm);
+    } else if (['.pl', '.pm', '.psgi', '.t'].includes(ext)) {
+      collect(/^\s*(?:use|require)\s+([A-Za-z_][\w:]*)/gm);
     }
     return values;
   }
@@ -249,6 +259,7 @@
 
   function detectHttp(file) {
     const text = file.content;
+    const ext = extension(file.path);
     const routes = [];
     const calls = [];
     const routePatterns = [
@@ -258,11 +269,19 @@
       { regex: /\bMap(Get|Post|Put|Patch|Delete)\s*\(\s*["']([^"']+)["']/gi, method: 1, path: 2 },
       { regex: /\bHandleFunc\s*\(\s*["']([^"']+)["']/gi, method: 0, path: 1 }
     ];
+    if (['.pl', '.pm', '.psgi', '.t'].includes(ext)) {
+      routePatterns.push(
+        { regex: /\b(get|post|put|patch|del|options|any)\s+["']([^"']+)["']\s*=>/gi, method: 1, path: 2 },
+        { regex: /\$(?:r|routes)\s*->\s*(get|post|put|patch|delete|options|any)\s*\(\s*["']([^"']+)["']/gi, method: 1, path: 2 }
+      );
+    }
     for (const pattern of routePatterns) {
       let match;
       while ((match = pattern.regex.exec(text))) {
         const path = normalizeRoute(match[pattern.path]);
-        if (path) routes.push({ method: pattern.method ? match[pattern.method].toUpperCase().replace('MAPPING', '') : 'ANY', path, file: file.path, line: lineNumber(text, match.index) });
+        const rawMethod = pattern.method ? match[pattern.method].toUpperCase().replace('MAPPING', '') : 'ANY';
+        const method = rawMethod === 'DEL' ? 'DELETE' : rawMethod;
+        if (path) routes.push({ method, path, file: file.path, line: lineNumber(text, match.index) });
       }
     }
     const callPatterns = [
@@ -272,6 +291,9 @@
       { regex: /\bhttp\.(get|post|put|patch|delete)\s*\(\s*["'`]([^"'`]+)["'`]/gi, method: 1, path: 2 },
       { regex: /\b(?:GetAsync|PostAsync|PutAsync|DeleteAsync)\s*\(\s*["']([^"']+)["']/gi, method: 'ANY', path: 1 }
     ];
+    if (['.pl', '.pm', '.psgi', '.t'].includes(ext)) {
+      callPatterns.push({ regex: /\$(?:ua|http|client)\s*->\s*(get|post|put|patch|delete)\s*\(\s*["']([^"']+)["']/gi, method: 1, path: 2 });
+    }
     for (const pattern of callPatterns) {
       let match;
       while ((match = pattern.regex.exec(text))) {
@@ -318,7 +340,7 @@
       for (const definition of splitSqlColumns(match[2])) {
         const value = definition.trim();
         if (!value || /^(?:constraint|primary\s+key|foreign\s+key|unique|check|index|key)\b/i.test(value)) continue;
-        const column = /^([`"\[]?[A-Za-z_][\w$]*[`"\]]?)\s+([^\s,]+)/.exec(value);
+        const column = /^([`"\[]?[A-Za-z_][\w$]*[`"\]]?)\s+([A-Za-z_][\w]*(?:\s*\([^)]*\))?)/.exec(value);
         if (column) columns.push({ name: cleanIdentifier(column[1]), datatype: column[2].toLowerCase() });
       }
       declarations.push({ table, columns, file: file.path, line: lineNumber(text, match.index) });

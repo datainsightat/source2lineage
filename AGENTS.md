@@ -54,8 +54,9 @@ Only confirmed findings enter `data-lineage.yaml`. Probable and unknown findings
 ## Supported evidence
 
 Inspect common manifests (`package.json`, `pyproject.toml`, `pom.xml`, Gradle builds,
-`.csproj`, `.fsproj`, `go.mod`, `Cargo.toml`, `composer.json`, `Gemfile`, `mix.exs`) to find
-project boundaries and explicit metadata. Inspect supported text source for:
+`.csproj`, `.fsproj`, `go.mod`, `Cargo.toml`, `composer.json`, `Gemfile`, `mix.exs`,
+`cpanfile`, `Makefile.PL`, `Build.PL`, `dist.ini`) to find project boundaries and explicit
+metadata. Inspect supported application source, including Perl, and SQL source for:
 
 - local imports and project references;
 - HTTP route declarations and literal HTTP client calls;

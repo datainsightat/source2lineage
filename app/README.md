@@ -65,7 +65,9 @@ Options:
 
 The engine recognizes manifest-defined projects, local imports, common HTTP server/client
 patterns, SQL tables, SQL reads/writes, and declared SQL columns across common JavaScript,
-TypeScript, Python, Java, .NET, Go, Rust, and SQL source files.
+TypeScript, Python, Java, .NET, Go, Rust, Perl, and SQL source files. Perl support includes
+`cpanfile`, `Makefile.PL`, `Build.PL`, and `dist.ini` project discovery, module imports,
+Dancer/Mojolicious-style literal routes, user-agent calls, and embedded SQL.
 
 Generated YAML uses JSON syntax, which is valid YAML 1.2 and can be reopened without an
 external parser.

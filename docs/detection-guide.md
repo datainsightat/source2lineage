@@ -18,6 +18,7 @@ The nearest supported manifest owns a source file. Common manifests are:
 | PHP | `composer.json` |
 | Ruby | `Gemfile` |
 | Elixir | `mix.exs` |
+| Perl | `cpanfile`, `Makefile.PL`, `Build.PL`, `dist.ini` |
 
 Workspace declarations and explicit project references are stronger boundary evidence than
 folder layout. A root-only repository without a manifest becomes one fallback application.
@@ -37,10 +38,11 @@ prove a dependency.
 ## HTTP and RPC
 
 Server evidence includes literal route declarations and registered controllers/handlers in
-JavaScript/TypeScript, Python, Java, .NET, and Go, plus GraphQL resolvers/schemas and protobuf
-service implementations. Client evidence includes literal `fetch`, Axios, Requests,
-HttpClient, RestTemplate/WebClient, Go HTTP, and generated-client calls whose target contract
-is visible.
+JavaScript/TypeScript, Python, Java, .NET, Go, and Perl (including Dancer-style and
+Mojolicious-style literal routes), plus GraphQL resolvers/schemas and protobuf service
+implementations. Client evidence includes literal `fetch`, Axios, Requests, HttpClient,
+RestTemplate/WebClient, Go HTTP, Perl user-agent calls, and generated-client calls whose target
+contract is visible.
 
 An exposed boundary becomes an `api` system. A caller-to-API edge needs a literal compatible
 path/method, a generated client bound to the contract, or explicit configuration linking the
@@ -52,6 +54,9 @@ definitions. An endpoint path by itself may be represented by a conservative end
 but it does not justify invented payload fields.
 
 ## SQL and databases
+
+Analyze standalone `.sql`, `.ddl`, `.dml`, and `.psql` files as well as literal SQL embedded
+in supported application source, including Perl modules and scripts.
 
 Direct evidence includes:
 
@@ -119,4 +124,3 @@ A final YAML finding needs direct syntax/configuration evidence. Two indirect si
 reported as probable in Markdown, but never promoted merely to make the graph look complete.
 Contradictions, reflection, generated runtime wiring, and unresolved dependency injection are
 limitations to explain, not gaps to fill with guesses.
-

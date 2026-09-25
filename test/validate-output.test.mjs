@@ -4,9 +4,11 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { parseCatalog, validateCatalog, validateFiles, validateReport } from '../scripts/validate-output.mjs';
+import '../app/source_lineage_engine.js';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const fixture = name => path.join(root, 'fixtures', name);
+const lineage = globalThis.SourceLineage;
 
 test('agent workflow targets the canonical S2L specification', () => {
   const repository = path.join(root, '..');
@@ -19,6 +21,70 @@ test('agent workflow targets the canonical S2L specification', () => {
   }
   assert.match(workflow, /do not create a placeholder or source-inventory object/i);
   assert.doesNotMatch(workflow, /create one conservative .*source inventory.* object/i);
+});
+
+test('recognizes Perl projects and standalone SQL source files', () => {
+  for (const file of [
+    'service/cpanfile',
+    'service/Makefile.PL',
+    'service/Build.PL',
+    'service/dist.ini',
+    'service/app.psgi',
+    'service/lib/Orders.pm',
+    'scripts/import.pl',
+    'db/schema.sql',
+    'db/schema.ddl',
+    'db/load.dml',
+    'db/session.psql'
+  ]) assert.equal(lineage.shouldAnalyzePath(file), true, file);
+  assert.equal(lineage.shouldAnalyzePath('service/t/routes.t'), false);
+  assert.equal(lineage.shouldAnalyzePath('service/t/routes.t', { includeTests: true }), true);
+});
+
+test('extracts Perl dependencies, HTTP flow, and embedded SQL lineage', () => {
+  const result = lineage.analyze([
+    {
+      path: 'service/Makefile.PL',
+      content: "WriteMakefile(NAME => 'Order::Service');\n"
+    },
+    {
+      path: 'service/app.psgi',
+      content: [
+        'use Dancer2;',
+        "get '/orders' => sub { return []; };",
+        "my $ddl = <<'SQL';",
+        'CREATE TABLE orders (',
+        '  order_id UUID,',
+        '  total NUMERIC(12,2)',
+        ');',
+        'SQL'
+      ].join('\n')
+    },
+    {
+      path: 'client/Makefile.PL',
+      content: "WriteMakefile(NAME => 'Order::Client');\n"
+    },
+    {
+      path: 'client/lib/Order/Client.pm',
+      content: [
+        'package Order::Client;',
+        'use Order::Service;',
+        "my $response = $ua->get('https://orders.example.test/orders');"
+      ].join('\n')
+    }
+  ], { projectName: 'Orders' });
+
+  const systems = new Map(result.catalog.systems.map(system => [system.name, system]));
+  assert.ok(systems.has('Order Client'));
+  assert.ok(systems.has('Order Service'));
+  assert.ok(systems.has('Order Service API'));
+  assert.ok(systems.has('Table orders'));
+  assert.ok(systems.get('Order Client').outputs.includes('Order Service'));
+  assert.ok(systems.get('Order Client').outputs.includes('Order Service API'));
+  assert.ok(result.catalog.objects.some(object => object.field === 'GET /orders'));
+  assert.ok(result.catalog.objects.some(object => object.field === 'orders.order_id' && object.datatype === 'uuid'));
+  assert.ok(result.catalog.objects.some(object => object.field === 'orders.total' && object.datatype === 'numeric(12,2)'));
+  assert.deepEqual(validateCatalog(result.catalog), []);
 });
 
 test('accepts a compatible catalog and complete report', () => {
